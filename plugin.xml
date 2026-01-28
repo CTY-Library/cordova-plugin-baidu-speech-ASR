@@ -5,7 +5,7 @@
     <name>BaiduSpeechASR</name>
     <description>基于百度语音识别SDK V3.5.0的Cordova插件</description>
     <license>MIT</license>
-    <keywords>cordova, speech, recognition, baidu, ASR, android</keywords>
+    <keywords>cordova, speech, recognition, baidu, ASR, android, ios, cross-platform</keywords>
     <repo>https://github.com/CTY-Library/cordova-plugin-baidu-speech-ASR</repo>
     <issue>https://github.com/CTY-Library/cordova-plugin-baidu-speech-ASR/issues</issue>
     
@@ -29,7 +29,7 @@
         </config-file>
         
         <!-- 源文件 -->
-        <source-file src="src/android/BaiduSpeechASR.java" target-dir="src/com/baidu/speech/cordova" />
+        <source-file src="src/android/BaiduSpeechASR.java" target-dir="src/com/baidu/speech/cordova" />        
         <source-file src="src/android/BaiduWakeupManager.java" target-dir="src/com/baidu/speech/cordova" />
         <source-file src="src/android/BaiduAuthUtil.java" target-dir="src/com/baidu/speech/cordova" />
         <source-file src="src/android/BaiduRecogResult.java" target-dir="src/com/baidu/speech/cordova" />
@@ -103,7 +103,7 @@
         </config-file>
     </platform>
 
-    <!-- iOS平台配置 (预留) -->
+    <!-- iOS平台配置 -->
     <platform name="ios">
         <config-file target="config.xml" parent="/*">
             <feature name="BaiduSpeechASR">
@@ -111,10 +111,54 @@
             </feature>
         </config-file>
         
-        <!-- iOS源文件预留 -->
-        <!-- <source-file src="src/ios/BaiduSpeechASR.m" /> -->
+        <!-- iOS源文件 -->
+        <source-file src="src/ios/BaiduSpeechASR.h" />
+        <source-file src="src/ios/BaiduSpeechASR.m" />
         
-        <!-- iOS框架依赖预留 -->
-        <!-- <framework src="AVFoundation.framework" /> -->
+        <!-- iOS头文件 -->
+        <header-file src="src/ios/include/BDSpeechBaseKit.h" />
+        <header-file src="src/ios/include/BDSEventManager.h" />
+        <header-file src="src/ios/include/BDSASRDefines.h" />
+        <header-file src="src/ios/include/BDSASRParameters.h" />
+        <header-file src="src/ios/include/BDSWakeupDefines.h" />
+        <header-file src="src/ios/include/BDSWakeupParameters.h" />
+        <header-file src="src/ios/include/AuthManager.h" />
+        <header-file src="src/ios/include/BDSUploaderDefines.h" />
+        <header-file src="src/ios/include/BDSUploaderParameters.h" />
+        
+        <!-- 百度语音识别SDK静态库 -->
+        <source-file src="src/ios/libs/libBDSpeechBaseKit.a" framework="true" />
+        
+        <!-- 百度SDK资源文件 -->
+        <resource-file src="src/ios/resources/BDSClientResources" />
+        
+        <!-- iOS框架依赖 -->
+        <framework src="AVFoundation.framework" />
+        <framework src="Speech.framework" />
+        <framework src="CoreAudio.framework" />
+        <framework src="AudioToolbox.framework" />
+        <framework src="SystemConfiguration.framework" />
+        <framework src="CoreTelephony.framework" />
+        <framework src="QuartzCore.framework" />
+        <framework src="CoreGraphics.framework" />
+        <framework src="Foundation.framework" />
+        <framework src="UIKit.framework" />
+        
+        <!-- Info.plist 配置 -->
+        <config-file target="*-Info.plist" parent="NSMicrophoneUsageDescription">
+            <string>This app needs access to microphone for speech recognition</string>
+        </config-file>
+        
+        <config-file target="*-Info.plist" parent="NSAppTransportSecurity">
+            <dict>
+                <key>NSAllowsArbitraryLoads</key>
+                <true/>
+            </dict>
+        </config-file>
+        
+        <!-- 构建配置 -->
+        <config-file target="config.xml" parent="/*">
+            <preference name="UseSwiftLanguageVersion" value="5" />
+        </config-file>
     </platform>
 </plugin>

@@ -37,6 +37,7 @@ cordova plugin add /path/to/cordova-plugin-baidu-speech-ASR \
    - **API Key**
    - **Secret Key** 
    - **App ID**
+(因为这些密钥是已经指定给当前特定的应用的包名,所以没有安全性问题)
 
 ## 支持平台
 
