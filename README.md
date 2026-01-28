@@ -37,12 +37,13 @@ cordova plugin add /path/to/cordova-plugin-baidu-speech-ASR \
    - **API Key**
    - **Secret Key** 
    - **App ID**
+
 (因为这些密钥是已经指定给当前特定的应用的包名,所以没有安全性问题)
 
 ## 支持平台
 
 - ✅ Android (API 16+)
-- ⏳ iOS (计划支持)
+- ⏳ iOS 
 
 ## 使用方法
 
@@ -412,14 +413,5 @@ MIT License
 - 支持语音识别功能
 - 支持语音唤醒功能
 - 支持Android平台
+- 支持IOS平台
 
-## 贡献
-
-欢迎提交Issue和Pull Request。
-
-## 联系方式
-
-如有问题，请通过以下方式联系：
-
-- GitHub Issues
-- Email: your-email@example.com
