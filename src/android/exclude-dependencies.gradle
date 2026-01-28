@@ -1,0 +1,32 @@
+// 强制排除冲突依赖的脚本
+// 应用在所有配置中
+
+// 全局依赖排除配置
+configurations {
+    all {
+        exclude group: 'com.alipay.sdk', module: 'alipaysdk-android'
+        exclude group: 'com.google.zxing', module: 'core'
+        exclude group: 'com.google.zxing', module: 'android-core'
+        exclude group: 'com.google.zxing', module: 'javase'
+    }
+    
+    implementation {
+        exclude group: 'com.alipay.sdk'
+        exclude group: 'com.google.zxing'
+    }
+    
+    compileOnly {
+        exclude group: 'com.alipay.sdk'
+        exclude group: 'com.google.zxing'
+    }
+}
+
+// 强制解析策略
+configurations.all {
+    resolutionStrategy {
+        // 强制依赖版本
+        force 'androidx.appcompat:appcompat:1.1.0'
+        force 'androidx.core:core:1.1.0'
+        force 'com.squareup.okhttp3:okhttp:3.12.12'
+    }
+}

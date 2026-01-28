@@ -1,0 +1,29 @@
+{
+  "name": "cordova-plugin-baidu-speech-ASR",
+  "version": "1.0.0",
+  "description": "Cordova plugin for Baidu Speech Recognition SDK V3.5.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cordova",
+    "plugin",
+    "baidu",
+    "speech",
+    "recognition",
+    "ASR",
+    "android"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "cordova": "^10.0.0"
+  },
+  "cordova": {
+    "id": "cordova-plugin-baidu-speech-ASR",
+    "platforms": [
+      "android"
+    ]
+  }
+}

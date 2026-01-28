@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="cordova-plugin-baidu-speech-ASR"
+        version="1.0.0">
+    <name>BaiduSpeechASR</name>
+    <description>基于百度语音识别SDK V3.5.0的Cordova插件</description>
+    <license>MIT</license>
+    <keywords>cordova, speech, recognition, baidu, ASR, android</keywords>
+    <repo>https://github.com/CTY-Library/cordova-plugin-baidu-speech-ASR</repo>
+    <issue>https://github.com/CTY-Library/cordova-plugin-baidu-speech-ASR/issues</issue>
+    
+    <!-- 插件配置参数 -->
+    <preference name="API_KEY" />
+    <preference name="SECRET_KEY" />
+    <preference name="APP_ID" />
+    
+    <!-- JavaScript模块 -->
+    <js-module name="BaiduSpeechASR" src="www/BaiduSpeechASR.js">
+        <clobbers target="BaiduSpeechASR" />
+    </js-module>
+
+    <!-- Android平台配置 -->
+    <platform name="android">
+        <!-- 配置文件注入 -->
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <meta-data android:name="com.baidu.speech.APP_ID" android:value="$APP_ID" />
+            <meta-data android:name="com.baidu.speech.API_KEY" android:value="$API_KEY" />
+            <meta-data android:name="com.baidu.speech.SECRET_KEY" android:value="$SECRET_KEY" />
+        </config-file>
+        
+        <!-- 源文件 -->
+        <source-file src="src/android/BaiduSpeechASR.java" target-dir="src/com/baidu/speech/cordova" />
+        <source-file src="src/android/BaiduWakeupManager.java" target-dir="src/com/baidu/speech/cordova" />
+        <source-file src="src/android/BaiduAuthUtil.java" target-dir="src/com/baidu/speech/cordova" />
+        <source-file src="src/android/BaiduRecogResult.java" target-dir="src/com/baidu/speech/cordova" />
+        <source-file src="src/android/BaiduRecogEventAdapter.java" target-dir="src/com/baidu/speech/cordova" />
+        <source-file src="src/android/BaiduIRecogListener.java" target-dir="src/com/baidu/speech/cordova" />
+        <source-file src="src/android/BaiduASRParams.java" target-dir="src/com/baidu/speech/cordova" />
+        
+        <!-- 百度SDK依赖包 -->
+        <lib-file src="src/android/libs/bdasr_aipd_V3_20250717_3493171.aar" />
+        
+        <!-- 百度SDK Native库文件 -->
+        <!-- ARM64架构 -->
+        <source-file src="src/android/src/main/jniLibs/arm64-v8a/libBaiduSpeechSDK.so" target-dir="jniLibs/arm64-v8a" />
+        <source-file src="src/android/src/main/jniLibs/arm64-v8a/libbdEASRAndroid.so" target-dir="jniLibs/arm64-v8a" />
+        <source-file src="src/android/src/main/jniLibs/arm64-v8a/libbdSpilWakeup.so" target-dir="jniLibs/arm64-v8a" />
+        <source-file src="src/android/src/main/jniLibs/arm64-v8a/libbd_easr_s1_merge_normal_20151216.dat.so" target-dir="jniLibs/arm64-v8a" />
+        <source-file src="src/android/src/main/jniLibs/arm64-v8a/libvad.dnn.so" target-dir="jniLibs/arm64-v8a" />
+        
+        <!-- ARM v7a架构 -->
+        <source-file src="src/android/src/main/jniLibs/armeabi-v7a/libBaiduSpeechSDK.so" target-dir="jniLibs/armeabi-v7a" />
+        <source-file src="src/android/src/main/jniLibs/armeabi-v7a/libbdEASRAndroid.so" target-dir="jniLibs/armeabi-v7a" />
+        <source-file src="src/android/src/main/jniLibs/armeabi-v7a/libbdSpilWakeup.so" target-dir="jniLibs/armeabi-v7a" />
+        <source-file src="src/android/src/main/jniLibs/armeabi-v7a/libbd_easr_s1_merge_normal_20151216.dat.so" target-dir="jniLibs/armeabi-v7a" />
+        <source-file src="src/android/src/main/jniLibs/armeabi-v7a/libvad.dnn.so" target-dir="jniLibs/armeabi-v7a" />
+        
+        <!-- ARM架构 (兼容性) -->
+        <source-file src="src/android/src/main/jniLibs/armeabi/libBaiduSpeechSDK.so" target-dir="jniLibs/armeabi" />
+        <source-file src="src/android/src/main/jniLibs/armeabi/libbdEASRAndroid.so" target-dir="jniLibs/armeabi" />
+        <source-file src="src/android/src/main/jniLibs/armeabi/libbdSpilWakeup.so" target-dir="jniLibs/armeabi" />
+        <source-file src="src/android/src/main/jniLibs/armeabi/libbd_easr_s1_merge_normal_20151216.dat.so" target-dir="jniLibs/armeabi" />
+        <source-file src="src/android/src/main/jniLibs/armeabi/libvad.dnn.so" target-dir="jniLibs/armeabi" />
+        
+        <!-- x86架构 -->
+        <source-file src="src/android/src/main/jniLibs/x86/libBaiduSpeechSDK.so" target-dir="jniLibs/x86" />
+        <source-file src="src/android/src/main/jniLibs/x86/libbdEASRAndroid.so" target-dir="jniLibs/x86" />
+        <source-file src="src/android/src/main/jniLibs/x86/libbdSpilWakeup.so" target-dir="jniLibs/x86" />
+        <source-file src="src/android/src/main/jniLibs/x86/libbd_easr_s1_merge_normal_20151216.dat.so" target-dir="jniLibs/x86" />
+        <source-file src="src/android/src/main/jniLibs/x86/libvad.dnn.so" target-dir="jniLibs/x86" />
+        
+        <!-- x86_64架构 -->
+        <source-file src="src/android/src/main/jniLibs/x86_64/libBaiduSpeechSDK.so" target-dir="jniLibs/x86_64" />
+        <source-file src="src/android/src/main/jniLibs/x86_64/libbdEASRAndroid.so" target-dir="jniLibs/x86_64" />
+        <source-file src="src/android/src/main/jniLibs/x86_64/libbdSpilWakeup.so" target-dir="jniLibs/x86_64" />
+        <source-file src="src/android/src/main/jniLibs/x86_64/libbd_easr_s1_merge_normal_20151216.dat.so" target-dir="jniLibs/x86_64" />
+        <source-file src="src/android/src/main/jniLibs/x86_64/libvad.dnn.so" target-dir="jniLibs/x86_64" />
+        
+        <!-- 权限配置 -->
+        <config-file target="AndroidManifest.xml" parent="/manifest">
+            <uses-permission android:name="android.permission.INTERNET" />
+            <uses-permission android:name="android.permission.RECORD_AUDIO" />
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+            <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+            <uses-permission android:name="android.permission.BLUETOOTH" />
+            <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+        </config-file>
+        
+        <!-- 构建配置 -->
+        <framework src="src/android/baidu-speech-asr-build.gradle" custom="true" type="gradleReference" />
+        <config-file target="gradle.properties" parent="/*">
+            <!-- 插件gradle配置会自动合并 -->
+        </config-file>
+        
+        <!-- 插件入口配置 -->
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="BaiduSpeechASR">
+                <param name="android-package" value="com.baidu.speech.cordova.BaiduSpeechASR" />
+            </feature>
+        </config-file>
+    </platform>
+
+    <!-- iOS平台配置 (预留) -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="BaiduSpeechASR">
+                <param name="ios-package" value="BaiduSpeechASR" />
+            </feature>
+        </config-file>
+        
+        <!-- iOS源文件预留 -->
+        <!-- <source-file src="src/ios/BaiduSpeechASR.m" /> -->
+        
+        <!-- iOS框架依赖预留 -->
+        <!-- <framework src="AVFoundation.framework" /> -->
+    </platform>
+</plugin>

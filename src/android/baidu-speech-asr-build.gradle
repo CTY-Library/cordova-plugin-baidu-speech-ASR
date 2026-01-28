@@ -1,0 +1,114 @@
+android {
+    packagingOptions {
+        // 处理百度SDK中的native库冲突
+        pickFirst 'lib/armeabi-v7a/libbd_easr_s1_merge_normal_20151216.dat.so'
+        pickFirst 'lib/arm64-v8a/libbd_easr_s1_merge_normal_20151216.dat.so'
+        pickFirst 'lib/armeabi/libbd_easr_s1_merge_normal_20151216.dat.so'
+        pickFirst 'lib/x86/libbd_easr_s1_merge_normal_20151216.dat.so'
+        pickFirst 'lib/x86_64/libbd_easr_s1_merge_normal_20151216.dat.so'
+        
+        // 不strip某些native库 - 确保百度SDK的native库不被优化
+        doNotStrip "**/libvad.dnn.so"
+        doNotStrip "**/libbd_easr_s1_merge_normal_20151216.dat.so"
+        doNotStrip "**/libBaiduSpeechSDK.so"
+        doNotStrip "**/libbdEASRAndroid.so"
+        doNotStrip "**/libbdSpilWakeup.so"
+        
+        // 处理支付宝SDK冲突 - 使用pickFirst保留第一个
+        pickFirst 'META-INF/com/alipay/android/app/mobilenotification.properties'
+        pickFirst 'META-INF/com/alipay/android/app/notify.properties'
+        pickFirst 'META-INF/com/alipay/android/app/security.properties'
+        
+        // 处理条码扫描SDK冲突
+        pickFirst 'META-INF/services/com.google.zxing.BarcodeReader'
+        pickFirst 'META-INF/services/com.google.zxing.BarcodeWriter'
+        
+        // 处理META-INF文件冲突
+        pickFirst 'META-INF/DEPENDENCIES'
+        pickFirst 'META-INF/LICENSE'
+        pickFirst 'META-INF/LICENSE.txt'
+        pickFirst 'META-INF/NOTICE'
+        pickFirst 'META-INF/NOTICE.txt'
+        pickFirst 'META-INF/INDEX.LIST'
+        
+        // 排除重复文件 - 针对支付宝SDK
+        exclude 'META-INF/AL2.0'
+        exclude 'META-INF/LGPL2.1'
+        exclude 'META-INF/LICENSE.md'
+        exclude 'META-INF/NOTICE.md'
+        exclude 'META-INF/maven/com.alipay.sdk/alipay-sdk-java/pom.properties'
+        exclude 'META-INF/maven/com.alipay.sdk/alipay-sdk-java/pom.xml'
+        exclude 'META-INF/maven/com.alipay.sdk/**'
+        
+        // 排除重复文件 - 针对条码扫描SDK
+        exclude 'META-INF/maven/com.google.zxing/core/pom.properties'
+        exclude 'META-INF/maven/com.google.zxing/core/pom.xml'
+        exclude 'META-INF/maven/com.google.zxing/**'
+        
+        // 排除支付宝SDK中的重复类
+        exclude 'com/alipay/**/BuildConfig.class'
+        exclude 'com/alipay/**/BuildConfig$*.class'
+        exclude 'com/google/zxing/**/BuildConfig.class'
+        exclude 'com/google/zxing/**/BuildConfig$*.class'
+        
+        // 排除所有可能的重复类
+        exclude '**/BuildConfig.class'
+        exclude '**/BuildConfig$*.class'
+        exclude '**/R.class'
+        exclude '**/R$*.class'
+    }
+    
+    // 添加配置来避免重复类检查
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+// 全局依赖排除配置 - 在android块外部
+configurations {
+    all {
+        exclude group: 'com.alipay.sdk', module: 'alipaysdk-android'
+        exclude group: 'com.google.zxing', module: 'core'
+        exclude group: 'com.google.zxing', module: 'android-core'
+        exclude group: 'com.google.zxing', module: 'javase'
+    }
+    
+    implementation {
+        exclude group: 'com.alipay.sdk'
+        exclude group: 'com.google.zxing'
+    }
+    
+    compileOnly {
+        exclude group: 'com.alipay.sdk'
+        exclude group: 'com.google.zxing'
+    }
+}
+
+// 强制解析策略
+configurations.all {
+    resolutionStrategy {
+        force 'com.google.zxing:core:3.3.3'
+        force 'com.alipay.sdk:alipaysdk-android:15.8.00'
+        force 'androidx.appcompat:appcompat:1.1.0'
+        force 'androidx.core:core:1.1.0'
+        force 'com.squareup.okhttp3:okhttp:3.12.12'
+    }
+}
+
+dependencies {
+    // 百度语音识别SDK
+    implementation(name: 'bdasr_aipd_V3_20250717_3493171', ext: 'aar')
+    
+    // AndroidX支持 - 使用更稳定的版本
+    //implementation 'androidx.appcompat:appcompat:1.1.0'
+    
+    // 网络请求相关 - 使用与支付宝SDK兼容的版本
+    //implementation 'com.squareup.okhttp3:okhttp:3.12.12'
+    
+    // JSON处理 - 使用系统内置的避免冲突
+    // implementation 'com.google.code.gson:gson:2.8.6'
+    
+    // 权限处理
+    //implementation 'androidx.core:core:1.1.0'
+}
