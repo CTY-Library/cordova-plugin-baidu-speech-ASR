@@ -657,7 +657,7 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
     
     // 设置用户参数
     if (params[@"pid"]) {
-        [self.asrEventManager setParameter:params[@"pid"] forKey:BDS_ASR_PROPERTY_LIST];
+        [self.asrEventManager setParameter:params[@"pid"] forKey:BDS_ASR_PRODUCT_ID];
     }
     if (params[@"language"]) {
         NSInteger languageValue = [self getLanguageValue:params[@"language"]];
@@ -675,8 +675,8 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
     }
     
     // 设置默认值
-    if (![self.asrEventManager getParameter:BDS_ASR_PROPERTY_LIST]) {
-        [self.asrEventManager setParameter:@[@(EVoiceRecognitionPropertyInput)] forKey:BDS_ASR_PROPERTY_LIST];
+    if (![self.asrEventManager getParameter:BDS_ASR_PRODUCT_ID]) {
+        [self.asrEventManager setParameter:@[@(EVoiceRecognitionPropertyInput)] forKey:BDS_ASR_PRODUCT_ID];
     }
     if (![self.asrEventManager getParameter:BDS_ASR_LANGUAGE]) {
         [self.asrEventManager setParameter:@(EVoiceRecognitionLanguageChinese) forKey:BDS_ASR_LANGUAGE];

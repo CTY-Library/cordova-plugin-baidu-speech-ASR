@@ -1065,7 +1065,7 @@ public class BaiduSpeechASR extends CordovaPlugin {
                         if (key.equals("language")) {
                             paramJson.put("language", value);
                         } else if (key.equals("pid")) {
-                            params.put(SpeechConstant.LANGUAGE, "yue-Hans-CN");
+                            params.put(SpeechConstant.LANGUAGE, "cmn-Hans-CN");
                         } else if (key.equals("accept-audio-volume")) {
                             paramJson.put("accept-audio-volume", value);
                         } else if (key.equals("rate")) {
@@ -1084,7 +1084,11 @@ public class BaiduSpeechASR extends CordovaPlugin {
 
             // 设置默认值（如果用户没有提供）
             if (!paramJson.has("pid")) {
-                params.put(SpeechConstant.LANGUAGE, "yue-Hans-CN");  // 普通话(支持简单的英文识别)
+                params.put(SpeechConstant.LANGUAGE, "cmn-Hans-CN");  // 普通话(支持简单的英文识别)
+                // "cmn-Hans-CN"  代表中文普通话
+                // "yue-Hans-CN"   代表粤语模型
+                // "en-GB"       英语
+                // "sichuan-Hans-CN" 四川话
             }
             if (!paramJson.has("language")) {
                 paramJson.put("language", "zh");
