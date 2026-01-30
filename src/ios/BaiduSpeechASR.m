@@ -46,7 +46,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     self.secretKey = [self.commandDelegate.settings objectForKey:@"SECRET_KEY"];
     self.appId = [self.commandDelegate.settings objectForKey:@"APP_ID"];
     
-    NSLog(@"BaiduSpeechASR config loaded - AppID: %@, APIKey: %@, SecretKey: %@", 
+    NSLog(@"BaiduSpeechASR config loaded - AppID: %@, APIKey: %@, SecretKey: %@",
           self.appId, [self maskKey:self.apiKey], [self maskKey:self.secretKey]);
     
     // 检查权限
@@ -85,12 +85,12 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     }
     
     // 验证参数
-    if (!self.apiKey || !self.secretKey || !self.appId || 
-        [self.apiKey isEqualToString:@""] || 
-        [self.secretKey isEqualToString:@""] || 
+    if (!self.apiKey || !self.secretKey || !self.appId ||
+        [self.apiKey isEqualToString:@""] ||
+        [self.secretKey isEqualToString:@""] ||
         [self.appId isEqualToString:@""]) {
         
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"Missing configuration parameters. Please set API_KEY, SECRET_KEY, APP_ID"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
@@ -98,7 +98,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     
     // 检查权限
     if (![self checkPermissions]) {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"Required permissions not granted"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
@@ -108,11 +108,11 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     BOOL success = [self initializeBaiduSDK];
     if (success) {
         self.isInitialized = YES;
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                      messageAsString:@"SDK initialized successfully"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } else {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"SDK initialization failed"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }
@@ -127,14 +127,14 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"实时转写已启动ing"];
     [pluginResult setKeepCallbackAsBool:YES];
     if (!self.isInitialized) {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"SDK not initialized. Please call init() first"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
     
     if (self.isRecognizing) {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"Recognition already in progress"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
@@ -157,7 +157,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
         //[result setKeepCallback:YES];
         //[self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } else {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"Failed to start recognition"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }
@@ -170,14 +170,14 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     NSLog(@"BaiduSpeechASR stopRecognition called");
     
     if (!self.isInitialized) {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"SDK not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
     
     if (!self.isRecognizing) {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"No recognition in progress"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
@@ -186,7 +186,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     // 停止识别
     [self stopRecognitionInternal];
     
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                  messageAsString:@"Recognition stopped"];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -198,7 +198,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     NSLog(@"BaiduSpeechASR cancelRecognition called");
     
     if (!self.isInitialized) {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"SDK not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
@@ -207,7 +207,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     // 取消识别
     [self cancelRecognitionInternal];
     
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                  messageAsString:@"Recognition cancelled"];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -220,7 +220,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     
     [self releaseResources];
     
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                  messageAsString:@"SDK released"];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -232,14 +232,14 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     NSLog(@"BaiduSpeechASR startWakeup called");
     
     if (!self.isInitialized) {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"SDK not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
     
     if (self.isWakeupActive) {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"Wakeup already active"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
@@ -257,12 +257,12 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
         self.isWakeupActive = YES;
         
         // 发送开始成功的回调，保持通道打开
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                      messageAsString:@"Wakeup started"];
         //[result setKeepCallback:YES];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } else {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"Failed to start wakeup"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }
@@ -275,7 +275,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     NSLog(@"BaiduSpeechASR stopWakeup called");
     
     if (!self.isInitialized) {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"SDK not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
@@ -284,7 +284,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     // 停止唤醒
     [self stopWakeupInternal];
     
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                  messageAsString:@"Wakeup stopped"];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -298,7 +298,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     // 参数将在startRecognition/startWakeup时设置
     // 这里只是保存参数，实际使用时再传递
     
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                  messageAsString:@"Parameters saved"];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -310,7 +310,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     NSLog(@"BaiduSpeechASR getVersion called");
     
     NSString *version = @"3.5.0"; // 百度SDK版本
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                  messageAsString:version];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -323,7 +323,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     
     NSDictionary *permissions = [self getPermissionStatus];
     
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                  messageAsDictionary:permissions];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -338,7 +338,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     // 这里返回当前权限状态
     NSDictionary *permissions = [self getPermissionStatus];
     
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                  messageAsDictionary:permissions];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -524,22 +524,22 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
 }
 
 - (void)sendCallbackToJS:(NSString *)type message:(NSString *)message {
-    if (self.transcribeCallbackId) {
+    if (self.recognitionCallbackId) {
         NSDictionary *resultDict = @{
             @"type": type, // start/partial/complete/error/info/stop/vad_start/vad_end
             @"message": message,
-            @"taskId": _currentTaskId ?: @""
+            @"taskId":  @""
         };
         
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:resultDict];
         [pluginResult setKeepCallbackAsBool:YES]; // 保持回调，持续返回结果
         
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.transcribeCallbackId];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.recognitionCallbackId];
         
         // 如果是最终结果或错误，结束持续回调
         if ([type isEqualToString:@"complete"] || [type isEqualToString:@"error"] || [type isEqualToString:@"stop"]) {
             [pluginResult setKeepCallbackAsBool:NO];
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.transcribeCallbackId];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.recognitionCallbackId];
         }
     }
 }
@@ -601,8 +601,8 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
         case EVoiceRecognitionClientWorkStatusError:
             eventTypeStr = EVENT_ERROR;
             if (aObj && [aObj isKindOfClass:[NSDictionary class]]) {
-                message = [NSString stringWithFormat:@"错误码: %@, 描述: %@", 
-                          aObj[@"error_code"] ?: @"未知", 
+                message = [NSString stringWithFormat:@"错误码: %@, 描述: %@",
+                          aObj[@"error_code"] ?: @"未知",
                           aObj[@"error_desc"] ?: @"未知错误"];
             } else {
                 message = @"识别发生未知错误";
@@ -634,14 +634,8 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
             NSLog(@"Unknown recognition work status: %d", workStatus);
             return;
     }
-    
-    //[self sendCallback:eventTypeStr message:message callbackId:self.recognitionCallbackId];
-    
-    //CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                                 messageAsString:message];
-    //[self.commandDelegate sendPluginResult:result callbackId: self.recognitionCallbackId];
 
-     [self sendCallbackToJS:EVENT_FINISH message:message];
+     [self sendCallbackToJS:eventTypeStr message:message];
 }
 
 #pragma mark - BDSClientWakeupDelegate
@@ -673,7 +667,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
         case EWakeupEngineWorkStatusError:
             eventTypeStr = EVENT_WAKEUP_ERROR;
             if (aObj && [aObj isKindOfClass:[NSDictionary class]]) {
-                message = [NSString stringWithFormat:@"唤醒错误: %@", 
+                message = [NSString stringWithFormat:@"唤醒错误: %@",
                           aObj[@"error_desc"] ?: @"未知错误"];
             } else {
                 message = @"唤醒发生未知错误";
@@ -739,7 +733,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     }
     
     // 最终结果、错误和结束事件不需要保持回调
-    if ([type isEqualToString:EVENT_FINAL] || [type isEqualToString:EVENT_ERROR] || 
+    if ([type isEqualToString:EVENT_FINAL] || [type isEqualToString:EVENT_ERROR] ||
         [type isEqualToString:EVENT_END] || [type isEqualToString:EVENT_FINISH]) {
         return NO;
     }
@@ -791,8 +785,8 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     if (!key || key.length <= 8) {
         return @"****";
     }
-    return [NSString stringWithFormat:@"%@****%@", 
-            [key substringToIndex:4], 
+    return [NSString stringWithFormat:@"%@****%@",
+            [key substringToIndex:4],
             [key substringFromIndex:key.length - 4]];
 }
 
