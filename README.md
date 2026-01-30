@@ -16,18 +16,12 @@
 
 ### 通过npm安装（推荐）
 ```bash
-cordova plugin add cordova-plugin-baidu-speech-ASR \
-  --variable API_KEY=your_api_key \
-  --variable SECRET_KEY=your_secret_key \
-  --variable APP_ID=your_app_id
+cordova plugin add https://github.com/CTY-Library/cordova-plugin-baidu-speech-ASR
 ```
 
 ### 通过本地安装
 ```bash
-cordova plugin add /path/to/cordova-plugin-baidu-speech-ASR \
-  --variable API_KEY=your_api_key \
-  --variable SECRET_KEY=your_secret_key \
-  --variable APP_ID=your_app_id
+cordova plugin add /path/to/cordova-plugin-baidu-speech-ASR 
 ```
 
 ### 获取百度语音API密钥
@@ -43,7 +37,7 @@ cordova plugin add /path/to/cordova-plugin-baidu-speech-ASR \
 ## 支持平台
 
 - ✅ Android (API 16+)
-- ⏳ iOS 
+- ✅ iOS 
 
 ## 使用方法
 

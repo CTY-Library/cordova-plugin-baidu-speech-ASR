@@ -26,6 +26,12 @@ static NSString * const EVENT_FINISH = @"finish";
 static NSString * const EVENT_WAKEUP_SUCCESS = @"wakeup_success";
 static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
 
+static NSString *const BDS_MIC_SAVE_AEC_DEBUG_FILE = @"mic_save_aec_debug_file.string";
+static NSString *const BDS_MIC_SAVE_VAD_DEBUG_FILE = @"mic_save_vad_debug_file.string";
+static NSString *const BDS_MIC_SAVE_WAKEUP_DEBUG_FILE = @"mic_save_wakeup_debug_file.string";
+static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_AUDIO_URL = @"mic_wakeup_debug_upload_audio_url.string";
+static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_upload_Limits_url.string";
+
 @implementation BaiduSpeechASR
 
 #pragma mark - 插件生命周期
@@ -117,7 +123,9 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
  */
 - (void)startRecognition:(CDVInvokedUrlCommand*)command {
     NSLog(@"BaiduSpeechASR startRecognition called");
-    
+    // 返回启动成功，并设置回调为持续回调
+    CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"实时转写已启动ing"];
+    [pluginResult setKeepCallbackAsBool:YES];
     if (!self.isInitialized) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
                                                      messageAsString:@"SDK not initialized. Please call init() first"];
@@ -144,10 +152,10 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
         self.isRecognizing = YES;
         
         // 发送开始成功的回调，保持通道打开
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
-                                                     messageAsString:@"Recognition started"];
-        [result setKeepCallback:YES];
-        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        //CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+          //                                           messageAsString:@"Recognition started"];
+        //[result setKeepCallback:YES];
+        //[self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } else {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
                                                      messageAsString:@"Failed to start recognition"];
@@ -251,7 +259,7 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
         // 发送开始成功的回调，保持通道打开
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK 
                                                      messageAsString:@"Wakeup started"];
-        [result setKeepCallback:YES];
+        //[result setKeepCallback:YES];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } else {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR 
@@ -343,39 +351,48 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
 - (BOOL)initializeBaiduSDK {
     NSLog(@"Initializing Baidu SDK...");
     
-    try {
-        // 设置在线身份验证
-        [[BDSpeechBaseKit sharedInstance] setASRLicenseWithAk:self.apiKey 
-                                                          AndSK:self.secretKey 
-                                                      AndAppcode:self.appId];
-        
-        // 创建语音识别事件管理器
-        self.asrEventManager = [BDSEventManager createEventManagerWithName:BDS_ASR_NAME];
-        if (!self.asrEventManager) {
-            NSLog(@"Failed to create ASR event manager");
-            return NO;
-        }
-        
-        // 设置代理
-        [self.asrEventManager setDelegate:self];
-        
-        // 创建语音唤醒事件管理器
-        self.wakeupEventManager = [BDSEventManager createEventManagerWithName:BDS_WAKEUP_NAME];
-        if (!self.wakeupEventManager) {
-            NSLog(@"Failed to create wakeup event manager");
-            return NO;
-        }
-        
-        // 设置代理
-        [self.wakeupEventManager setDelegate:self];
-        
+    // 语音识别鉴权库manager管理类初始化
+    self.asrEventManager = [[BDSpeechBaseKit sharedInstance] getBDSEventManager];
+    // 设置唤醒类
+    self.wakeupEventManager = [[BDSpeechBaseKit sharedInstance] getWakeupEventManager];
+    // pid初始化 默认1537
+    [self.asrEventManager setParameter:@"1537" forKey:BDS_ASR_PRODUCT_ID];
+    // 版本号
+    NSLog(@"Current SDK version: %@", [[BDSpeechBaseKit sharedInstance] getASRLibVersion]);
+    // 配置鉴权库获取token、iamkey协议 用于实现 gettoken iamkey 方法
+    //[AuthManager sharedInstance].temporaryTokenAndKeyDelegate = self;
+    // 鉴权sdk层错误日志开启 默认NO不开启
+//    [[BDSpeechBaseKit sharedInstance] setAuthLogStatus:YES];
+    //设置DEBUG_LOG的级别 默认0不打开日志 设置6全部日志 其他方式不常用特定场景考虑
+    [self.asrEventManager setParameter:@(EVRDebugLogLevelTrace) forKey:BDS_ASR_DEBUG_LOG_LEVEL];
+    //ak、sk鉴权
+    [[BDSpeechBaseKit sharedInstance] setASRLicenseWithAk:self.apiKey AndSK:self.secretKey AndAppcode:self.appId];
+    //iamkey鉴权
+//  [[BDSpeechBaseKit sharedInstance] setASRLicenseWithIamKey:IAM_KEY Andsk:SECRET_KEY AndAppCode:APP_ID];
+    // 临时token鉴权方式 参考sendPostRequest方法中使用事例
+//    [[BDSpeechBaseKit sharedInstance] setASRLicenseWithAuthToken:token AndExpirationDate:result AndAk:API_KEY AndAppCode:APP_ID];
+    
+    //self.continueToVR = NO;
+    //[[BDVRSettings getInstance] configBDVRClient];
+    
+    //设置端点检测
+    [self configDNNMFE];
+    
+     
         NSLog(@"Baidu SDK initialized successfully");
         return YES;
         
-    } @catch (NSException *exception) {
-        NSLog(@"Baidu SDK initialization failed: %@", exception.reason);
-        return NO;
-    }
+
+}
+
+- (void)configDNNMFE {
+    NSString *mfe_dnn_filepath = [[NSBundle mainBundle] pathForResource:@"bds_easr_mfe_dnn" ofType:@"dat"];
+    [self.asrEventManager setParameter:mfe_dnn_filepath forKey:BDS_ASR_MFE_DNN_DAT_FILE];
+    NSString *cmvn_dnn_filepath = [[NSBundle mainBundle] pathForResource:@"bds_easr_mfe_cmvn" ofType:@"dat"];
+    [self.asrEventManager setParameter:cmvn_dnn_filepath forKey:BDS_ASR_MFE_CMVN_DAT_FILE];
+    // 自定义静音时长
+    //    [self.asrEventManager setParameter:@(501) forKey:BDS_ASR_MFE_MAX_SPEECH_PAUSE];
+    //    [self.asrEventManager setParameter:@(500) forKey:BDS_ASR_MFE_MAX_WAIT_DURATION];
 }
 
 /**
@@ -388,21 +405,29 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
         NSLog(@"ASR event manager is nil");
         return NO;
     }
-    
-    try {
-        // 设置识别参数
-        [self configureRecognitionParams:params];
+ 
         
+    [self.asrEventManager setParameter:@(NO) forKey:BDS_ASR_NEED_CACHE_AUDIO];
+    [self.asrEventManager setParameter:@"" forKey:BDS_ASR_OFFLINE_ENGINE_TRIGGERED_WAKEUP_WORD];
+    [self.asrEventManager setParameter:@(YES) forKey:BDS_ASR_ENABLE_LONG_SPEECH];
+    // 长语音请务必开启本地VAD
+    [self.asrEventManager setParameter:@(YES) forKey:BDS_ASR_ENABLE_LOCAL_VAD];
+    
+    [self.asrEventManager setParameter:@(NO) forKey:BDS_ASR_ENABLE_LONG_SPEECH];
+    [self.asrEventManager setParameter:@(NO) forKey:BDS_ASR_NEED_CACHE_AUDIO];
+    [self.asrEventManager setParameter:@"" forKey:BDS_ASR_OFFLINE_ENGINE_TRIGGERED_WAKEUP_WORD];
+        [self.asrEventManager setDelegate:self];
+        [self.asrEventManager setParameter:nil forKey:BDS_ASR_AUDIO_FILE_PATH];
+        [self.asrEventManager setParameter:nil forKey:BDS_ASR_AUDIO_INPUT_STREAM];
+    
+    
         // 发送开始识别指令
         [self.asrEventManager sendCommand:BDS_ASR_CMD_START];
         
         NSLog(@"Recognition start command sent successfully");
         return YES;
         
-    } @catch (NSException *exception) {
-        NSLog(@"Failed to start recognition: %@", exception.reason);
-        return NO;
-    }
+
 }
 
 /**
@@ -444,7 +469,7 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
         return NO;
     }
     
-    try {
+
         // 设置唤醒参数
         [self configureWakeupParams:params];
         
@@ -454,10 +479,7 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
         NSLog(@"Wakeup start command sent successfully");
         return YES;
         
-    } @catch (NSException *exception) {
-        NSLog(@"Failed to start wakeup: %@", exception.reason);
-        return NO;
-    }
+
 }
 
 /**
@@ -501,6 +523,160 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
     self.isInitialized = NO;
 }
 
+
+#pragma mark - MVoiceRecognitionClientDelegate
+
+- (void)VoiceRecognitionClientWorkStatus_gf:(int)workStatus obj:(id)aObj {
+    switch (workStatus) {
+        case EVoiceRecognitionClientWorkStatusNewRecordData: {
+            //[self.fileHandler writeData:(NSData *)aObj];
+            break;
+        }
+            
+        case EVoiceRecognitionClientWorkStatusStartWorkIng: {
+            NSDictionary *logDic = [self parseLogToDic:aObj];
+            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK: start vr, log: %@\n", logDic]];
+            //[self onStartWorking];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusStart: {
+            [self printLogTextView:@"CALLBACK: detect voice start point.\n"];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusEnd: {
+            [self printLogTextView:@"CALLBACK: detect voice end point.\n"];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusFlushData: {
+            //[self printLogTextView:[NSString stringWithFormat:@"CALLBACK: partial result - %@.\n\n", [self getDescriptionForDic:aObj]]];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusFinish: {
+            //[self printLogTextView:[NSString stringWithFormat:@"CALLBACK: final result - %@.\n\n", [self getDescriptionForDic:aObj]]];
+            if (aObj) {
+               // self.resultTextView.text = [self getDescriptionForDic:aObj];
+                
+                [self sendCallback:EVENT_FINISH  message:aObj callbackId:self.recognitionCallbackId];
+                
+                
+            }
+//            if (!self.longSpeechFlag) {
+//                [self onEnd];
+//            }
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusMeterLevel: {
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusCancel: {
+            [self printLogTextView:@"CALLBACK: user press cancel.\n"];
+            //[self onEnd];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusError: {
+            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK: encount error - %@.\n", (NSError *)aObj]];
+           // [self onEnd];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusLoaded: {
+            [self printLogTextView:@"CALLBACK: offline engine loaded.\n"];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusUnLoaded: {
+            [self printLogTextView:@"CALLBACK: offline engine unLoaded.\n"];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusChunkThirdData: {
+            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK: Chunk 3-party data length: %lu\n", (unsigned long)[(NSData *)aObj length]]];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusChunkNlu: {
+            NSString *nlu = [[NSString alloc] initWithData:(NSData *)aObj encoding:NSUTF8StringEncoding];
+            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK: Chunk NLU data: %@\n", nlu]];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusChunkEnd: {
+            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK: Chunk end, sn: %@.\n", aObj]];
+//            if (!self.longSpeechFlag) {
+//                [self onEnd];
+//            }
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusFeedback: {
+            NSDictionary *logDic = [self parseLogToDic:aObj];
+            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK Feedback: %@\n", logDic]];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusRecorderEnd: {
+            [self printLogTextView:@"CALLBACK: recorder closed.\n"];
+            break;
+        }
+        case EVoiceRecognitionClientWorkStatusLongSpeechEnd: {
+            [self printLogTextView:@"CALLBACK: Long Speech end.\n"];
+           // [self onEnd];
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+- (void)WakeupClientWorkStatus:(int)workStatus obj:(id)aObj {
+    switch (workStatus) {
+        case EWakeupEngineWorkStatusStarted: {
+            [self printLogTextView:@"WAKEUP CALLBACK: Started.\n"];
+            break;
+        }
+        case EWakeupEngineWorkStatusStopped: {
+            [self printLogTextView:@"WAKEUP CALLBACK: Stopped.\n"];
+            break;
+        }
+        case EWakeupEngineWorkStatusLoaded: {
+            [self printLogTextView:@"WAKEUP CALLBACK: Loaded.\n"];
+            break;
+        }
+        case EWakeupEngineWorkStatusUnLoaded: {
+            [self printLogTextView:@"WAKEUP CALLBACK: UnLoaded.\n"];
+            break;
+        }
+        case EWakeupEngineWorkStatusTriggered: {
+            [self printLogTextView:[NSString stringWithFormat:@"WAKEUP CALLBACK: Triggered - %@.\n", (NSString *)aObj]];
+//            if (self.continueToVR) {
+//                self.continueToVR = NO;
+//                [self.asrEventManager setParameter:@(YES) forKey:BDS_ASR_NEED_CACHE_AUDIO];
+//                [self.asrEventManager setParameter:aObj forKey:BDS_ASR_OFFLINE_ENGINE_TRIGGERED_WAKEUP_WORD];
+//                [self voiceRecogButtonHelper];
+//            }
+            break;
+        }
+        case EWakeupEngineWorkStatusError: {
+            [self printLogTextView:[NSString stringWithFormat:@"WAKEUP CALLBACK: encount error - %@.\n", (NSError *)aObj]];
+            break;
+        }
+            
+        default:
+            break;
+    }
+}
+
+- (void)printLogTextView:(NSString *)logString {
+//    self.logTextView.text = [logString stringByAppendingString:_logTextView.text];
+//    [self.logTextView scrollRangeToVisible:NSMakeRange(0, 0)];
+}
+
+- (NSDictionary *)parseLogToDic:(NSString *)logString {
+    NSArray *tmp = NULL;
+    NSMutableDictionary *logDic = [[NSMutableDictionary alloc] initWithCapacity:3];
+    NSArray *items = [logString componentsSeparatedByString:@"&"];
+    for (NSString *item in items) {
+        tmp = [item componentsSeparatedByString:@"="];
+        if (tmp.count == 2) {
+            [logDic setObject:tmp.lastObject forKey:tmp.firstObject];
+        }
+    }
+    return logDic;
+}
+
 #pragma mark - BDSClientASRDelegate
 
 /**
@@ -541,11 +717,11 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
             
         case EVoiceRecognitionClientWorkStatusFinish:
             eventTypeStr = EVENT_FINAL;
-            if (aObj && [aObj isKindOfClass:[NSDictionary class]]) {
-                message = aObj[@"results"] ?: @"";
-            } else if (aObj && [aObj isKindOfClass:[NSString class]]) {
+//            if (aObj && [aObj isKindOfClass:[NSDictionary class]]) {
+//                message = aObj[@"results"] ?: @"";
+//            } else if (aObj && [aObj isKindOfClass:[NSString class]]) {
                 message = aObj;
-            }
+           // }
             self.isRecognizing = NO;
             break;
             
@@ -582,6 +758,7 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
             
         case EVoiceRecognitionClientWorkStatusLongSpeechEnd:
             eventTypeStr = EVENT_FINISH;
+            
             message = @"长语音识别结束";
             break;
             
@@ -590,20 +767,16 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
             return;
     }
     
-    [self sendCallback:eventTypeStr message:message callbackId:self.recognitionCallbackId];
+    //[self sendCallback:eventTypeStr message:message callbackId:self.recognitionCallbackId];
+    
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                 messageAsString:message];
+    [self.commandDelegate sendPluginResult:result callbackId: self.recognitionCallbackId];
 }
 
 #pragma mark - BDSClientWakeupDelegate
 
-/**
- * 语音唤醒代理回调
- */
-- (void)WakeupClientWorkStatus:(int)workStatus obj:(id)aObj {
-    NSLog(@"Received wakeup work status: %d, obj: %@", workStatus, aObj);
-    
-    [self handleWakeupWorkStatus:workStatus obj:aObj];
-}
-
+ 
 /**
  * 处理唤醒工作状态
  */
@@ -647,47 +820,7 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
 }
 
 #pragma mark - 辅助方法
-
-/**
- * 配置识别参数
- */
-- (void)configureRecognitionParams:(NSDictionary *)params {
-    // 设置默认参数
-    [self.asrEventManager setParameter:@(EVR_STRATEGY_ONLINE) forKey:BDS_ASR_STRATEGY];
-    
-    // 设置用户参数
-    if (params[@"pid"]) {
-        [self.asrEventManager setParameter:params[@"pid"] forKey:BDS_ASR_PRODUCT_ID];
-    }
-    if (params[@"language"]) {
-        NSInteger languageValue = [self getLanguageValue:params[@"language"]];
-        [self.asrEventManager setParameter:@(languageValue) forKey:BDS_ASR_LANGUAGE];
-    }
-    if (params[@"accept-audio-volume"]) {
-        [self.asrEventManager setParameter:params[@"accept-audio-volume"] forKey:BDS_ASR_ENABLE_LOCAL_VAD];
-    }
-    if (params[@"rate"]) {
-        NSInteger rateValue = [self getSampleRateValue:params[@"rate"]];
-        [self.asrEventManager setParameter:@(rateValue) forKey:BDS_ASR_SAMPLE_RATE];
-    }
-    if (params[@"cuid"]) {
-        [self.asrEventManager setParameter:params[@"cuid"] forKey:BDS_ASR_CUID];
-    }
-    
-    // 设置默认值
-    if (![self.asrEventManager getParameter:BDS_ASR_PRODUCT_ID]) {
-        [self.asrEventManager setParameter:@[@(EVoiceRecognitionPropertyInput)] forKey:BDS_ASR_PRODUCT_ID];
-    }
-    if (![self.asrEventManager getParameter:BDS_ASR_LANGUAGE]) {
-        [self.asrEventManager setParameter:@(EVoiceRecognitionLanguageChinese) forKey:BDS_ASR_LANGUAGE];
-    }
-    if (![self.asrEventManager getParameter:BDS_ASR_ENABLE_LOCAL_VAD]) {
-        [self.asrEventManager setParameter:@(YES) forKey:BDS_ASR_ENABLE_LOCAL_VAD];
-    }
-    if (![self.asrEventManager getParameter:BDS_ASR_SAMPLE_RATE]) {
-        [self.asrEventManager setParameter:@(EVoiceRecognitionRecordSampleRate16K) forKey:BDS_ASR_SAMPLE_RATE];
-    }
-}
+ 
 
 /**
  * 配置唤醒参数
@@ -698,7 +831,7 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
 }
 
 /**
- * 发送回调 - 参考AISpeechTranscriber的实现
+ * 发送回调
  */
 - (void)sendCallback:(NSString *)type message:(NSString *)message callbackId:(NSString *)callbackId {
     if (!callbackId) {
@@ -706,7 +839,7 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
         return;
     }
     
-    try {
+ 
         NSDictionary *resultDict = @{
             @"type": type,
             @"message": message,
@@ -717,15 +850,13 @@ static NSString * const EVENT_WAKEUP_ERROR = @"wakeup_error";
         
         // 根据事件类型决定是否保持回调
         BOOL shouldKeepCallback = [self shouldKeepCallbackForType:type];
-        [pluginResult setKeepCallback:shouldKeepCallback];
+      //  [pluginResult setKeepCallback:shouldKeepCallback];
         
         [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
         
         NSLog(@"Callback sent - type: %@, message: %@, keepCallback: %@", type, message, shouldKeepCallback ? @"YES" : @"NO");
         
-    } catch (Exception e) {
-        NSLog(@"Failed to send callback: %@", e.reason);
-    }
+ 
 }
 
 /**
