@@ -523,159 +523,27 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     self.isInitialized = NO;
 }
 
-
-#pragma mark - MVoiceRecognitionClientDelegate
-
-- (void)VoiceRecognitionClientWorkStatus_gf:(int)workStatus obj:(id)aObj {
-    switch (workStatus) {
-        case EVoiceRecognitionClientWorkStatusNewRecordData: {
-            //[self.fileHandler writeData:(NSData *)aObj];
-            break;
-        }
-            
-        case EVoiceRecognitionClientWorkStatusStartWorkIng: {
-            NSDictionary *logDic = [self parseLogToDic:aObj];
-            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK: start vr, log: %@\n", logDic]];
-            //[self onStartWorking];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusStart: {
-            [self printLogTextView:@"CALLBACK: detect voice start point.\n"];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusEnd: {
-            [self printLogTextView:@"CALLBACK: detect voice end point.\n"];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusFlushData: {
-            //[self printLogTextView:[NSString stringWithFormat:@"CALLBACK: partial result - %@.\n\n", [self getDescriptionForDic:aObj]]];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusFinish: {
-            //[self printLogTextView:[NSString stringWithFormat:@"CALLBACK: final result - %@.\n\n", [self getDescriptionForDic:aObj]]];
-            if (aObj) {
-               // self.resultTextView.text = [self getDescriptionForDic:aObj];
-                
-                [self sendCallback:EVENT_FINISH  message:aObj callbackId:self.recognitionCallbackId];
-                
-                
-            }
-//            if (!self.longSpeechFlag) {
-//                [self onEnd];
-//            }
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusMeterLevel: {
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusCancel: {
-            [self printLogTextView:@"CALLBACK: user press cancel.\n"];
-            //[self onEnd];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusError: {
-            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK: encount error - %@.\n", (NSError *)aObj]];
-           // [self onEnd];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusLoaded: {
-            [self printLogTextView:@"CALLBACK: offline engine loaded.\n"];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusUnLoaded: {
-            [self printLogTextView:@"CALLBACK: offline engine unLoaded.\n"];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusChunkThirdData: {
-            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK: Chunk 3-party data length: %lu\n", (unsigned long)[(NSData *)aObj length]]];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusChunkNlu: {
-            NSString *nlu = [[NSString alloc] initWithData:(NSData *)aObj encoding:NSUTF8StringEncoding];
-            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK: Chunk NLU data: %@\n", nlu]];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusChunkEnd: {
-            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK: Chunk end, sn: %@.\n", aObj]];
-//            if (!self.longSpeechFlag) {
-//                [self onEnd];
-//            }
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusFeedback: {
-            NSDictionary *logDic = [self parseLogToDic:aObj];
-            [self printLogTextView:[NSString stringWithFormat:@"CALLBACK Feedback: %@\n", logDic]];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusRecorderEnd: {
-            [self printLogTextView:@"CALLBACK: recorder closed.\n"];
-            break;
-        }
-        case EVoiceRecognitionClientWorkStatusLongSpeechEnd: {
-            [self printLogTextView:@"CALLBACK: Long Speech end.\n"];
-           // [self onEnd];
-            break;
-        }
-        default:
-            break;
-    }
-}
-
-- (void)WakeupClientWorkStatus:(int)workStatus obj:(id)aObj {
-    switch (workStatus) {
-        case EWakeupEngineWorkStatusStarted: {
-            [self printLogTextView:@"WAKEUP CALLBACK: Started.\n"];
-            break;
-        }
-        case EWakeupEngineWorkStatusStopped: {
-            [self printLogTextView:@"WAKEUP CALLBACK: Stopped.\n"];
-            break;
-        }
-        case EWakeupEngineWorkStatusLoaded: {
-            [self printLogTextView:@"WAKEUP CALLBACK: Loaded.\n"];
-            break;
-        }
-        case EWakeupEngineWorkStatusUnLoaded: {
-            [self printLogTextView:@"WAKEUP CALLBACK: UnLoaded.\n"];
-            break;
-        }
-        case EWakeupEngineWorkStatusTriggered: {
-            [self printLogTextView:[NSString stringWithFormat:@"WAKEUP CALLBACK: Triggered - %@.\n", (NSString *)aObj]];
-//            if (self.continueToVR) {
-//                self.continueToVR = NO;
-//                [self.asrEventManager setParameter:@(YES) forKey:BDS_ASR_NEED_CACHE_AUDIO];
-//                [self.asrEventManager setParameter:aObj forKey:BDS_ASR_OFFLINE_ENGINE_TRIGGERED_WAKEUP_WORD];
-//                [self voiceRecogButtonHelper];
-//            }
-            break;
-        }
-        case EWakeupEngineWorkStatusError: {
-            [self printLogTextView:[NSString stringWithFormat:@"WAKEUP CALLBACK: encount error - %@.\n", (NSError *)aObj]];
-            break;
-        }
-            
-        default:
-            break;
-    }
-}
-
-- (void)printLogTextView:(NSString *)logString {
-//    self.logTextView.text = [logString stringByAppendingString:_logTextView.text];
-//    [self.logTextView scrollRangeToVisible:NSMakeRange(0, 0)];
-}
-
-- (NSDictionary *)parseLogToDic:(NSString *)logString {
-    NSArray *tmp = NULL;
-    NSMutableDictionary *logDic = [[NSMutableDictionary alloc] initWithCapacity:3];
-    NSArray *items = [logString componentsSeparatedByString:@"&"];
-    for (NSString *item in items) {
-        tmp = [item componentsSeparatedByString:@"="];
-        if (tmp.count == 2) {
-            [logDic setObject:tmp.lastObject forKey:tmp.firstObject];
+- (void)sendCallbackToJS:(NSString *)type message:(NSString *)message {
+    if (self.transcribeCallbackId) {
+        NSDictionary *resultDict = @{
+            @"type": type, // start/partial/complete/error/info/stop/vad_start/vad_end
+            @"message": message,
+            @"taskId": _currentTaskId ?: @""
+        };
+        
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:resultDict];
+        [pluginResult setKeepCallbackAsBool:YES]; // 保持回调，持续返回结果
+        
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:self.transcribeCallbackId];
+        
+        // 如果是最终结果或错误，结束持续回调
+        if ([type isEqualToString:@"complete"] || [type isEqualToString:@"error"] || [type isEqualToString:@"stop"]) {
+            [pluginResult setKeepCallbackAsBool:NO];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:self.transcribeCallbackId];
         }
     }
-    return logDic;
 }
+
 
 #pragma mark - BDSClientASRDelegate
 
@@ -769,9 +637,11 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     
     //[self sendCallback:eventTypeStr message:message callbackId:self.recognitionCallbackId];
     
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+    //CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                  messageAsString:message];
-    [self.commandDelegate sendPluginResult:result callbackId: self.recognitionCallbackId];
+    //[self.commandDelegate sendPluginResult:result callbackId: self.recognitionCallbackId];
+
+     [self sendCallbackToJS:EVENT_FINISH message:message];
 }
 
 #pragma mark - BDSClientWakeupDelegate
