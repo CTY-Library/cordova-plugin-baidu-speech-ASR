@@ -162,25 +162,19 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     NSLog(@"BaiduSpeechASR stopRecognition called");
     
     if (!self.isInitialized) {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
-                                                     messageAsString:@"SDK not initialized"];
-        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        [self sendCallbackToJS:@"stopRecognition" message:@"SDK not initialized"];
         return;
     }
     
     if (!self.isRecognizing) {
-        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
-                                                     messageAsString:@"No recognition in progress"];
-        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        [self sendCallbackToJS:@"stopRecognition" message:@"No recognition in progress"];
         return;
     }
     
     // 停止识别
     [self stopRecognitionInternal];
-    
-    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
-                                                 messageAsString:@"Recognition stopped"];
-    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+     
+    [self sendCallbackToJS:@"stopRecognition" message:@"Recognition stopped"];
 }
 
 /**
