@@ -159,8 +159,8 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
  * 停止语音识别
  */
 - (void)stopRecognition:(CDVInvokedUrlCommand*)command {
-    NSLog(@"BaiduSpeechASR stopRecognition called");
-    
+    NSLog(@"BaiduSpeechASR stopRecognition called");        
+    self.recognitionCallbackId = command.callbackId;// 保存回调ID
     if (!self.isInitialized) {
         [self sendCallbackToJS:@"stopRecognition" message:@"SDK not initialized"];
         return;
