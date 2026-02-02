@@ -351,28 +351,19 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     [self.asrEventManager setParameter:@"1537" forKey:BDS_ASR_PRODUCT_ID];
     // 版本号
     NSLog(@"Current SDK version: %@", [[BDSpeechBaseKit sharedInstance] getASRLibVersion]);
-    // 配置鉴权库获取token、iamkey协议 用于实现 gettoken iamkey 方法
-    //[AuthManager sharedInstance].temporaryTokenAndKeyDelegate = self;
+ 
     // 鉴权sdk层错误日志开启 默认NO不开启
-//    [[BDSpeechBaseKit sharedInstance] setAuthLogStatus:YES];
+    // [[BDSpeechBaseKit sharedInstance] setAuthLogStatus:YES];
     //设置DEBUG_LOG的级别 默认0不打开日志 设置6全部日志 其他方式不常用特定场景考虑
     [self.asrEventManager setParameter:@(EVRDebugLogLevelTrace) forKey:BDS_ASR_DEBUG_LOG_LEVEL];
     //ak、sk鉴权
     [[BDSpeechBaseKit sharedInstance] setASRLicenseWithAk:self.apiKey AndSK:self.secretKey AndAppcode:self.appId];
-    //iamkey鉴权
-//  [[BDSpeechBaseKit sharedInstance] setASRLicenseWithIamKey:IAM_KEY Andsk:SECRET_KEY AndAppCode:APP_ID];
-    // 临时token鉴权方式 参考sendPostRequest方法中使用事例
-//    [[BDSpeechBaseKit sharedInstance] setASRLicenseWithAuthToken:token AndExpirationDate:result AndAk:API_KEY AndAppCode:APP_ID];
-    
-    //self.continueToVR = NO;
-    //[[BDVRSettings getInstance] configBDVRClient];
-    
-    //设置端点检测
-    [self configDNNMFE];
-    
      
-        NSLog(@"Baidu SDK initialized successfully");
-        return YES;
+    //设置端点检测
+    [self configDNNMFE];    
+     
+    NSLog(@"Baidu SDK initialized successfully");
+    return YES;
         
 
 }
@@ -408,16 +399,16 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     [self.asrEventManager setParameter:@(NO) forKey:BDS_ASR_ENABLE_LONG_SPEECH];
     [self.asrEventManager setParameter:@(NO) forKey:BDS_ASR_NEED_CACHE_AUDIO];
     [self.asrEventManager setParameter:@"" forKey:BDS_ASR_OFFLINE_ENGINE_TRIGGERED_WAKEUP_WORD];
-        [self.asrEventManager setDelegate:self];
-        [self.asrEventManager setParameter:nil forKey:BDS_ASR_AUDIO_FILE_PATH];
-        [self.asrEventManager setParameter:nil forKey:BDS_ASR_AUDIO_INPUT_STREAM];
+    [self.asrEventManager setDelegate:self];
+    [self.asrEventManager setParameter:nil forKey:BDS_ASR_AUDIO_FILE_PATH];
+    [self.asrEventManager setParameter:nil forKey:BDS_ASR_AUDIO_INPUT_STREAM];
+
+
+    // 发送开始识别指令
+    [self.asrEventManager sendCommand:BDS_ASR_CMD_START];
     
-    
-        // 发送开始识别指令
-        [self.asrEventManager sendCommand:BDS_ASR_CMD_START];
-        
-        NSLog(@"Recognition start command sent successfully");
-        return YES;
+    NSLog(@"Recognition start command sent successfully");
+    return YES;
         
 
 }
@@ -459,17 +450,16 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     if (!self.wakeupEventManager) {
         NSLog(@"Wakeup event manager is nil");
         return NO;
-    }
-    
+    } 
 
-        // 设置唤醒参数
-        [self configureWakeupParams:params];
-        
-        // 发送开始唤醒指令
-        [self.wakeupEventManager sendCommand:BDS_WP_CMD_START];
-        
-        NSLog(@"Wakeup start command sent successfully");
-        return YES;
+    // 设置唤醒参数
+    [self configureWakeupParams:params];
+    
+    // 发送开始唤醒指令
+    [self.wakeupEventManager sendCommand:BDS_WP_CMD_START];
+    
+    NSLog(@"Wakeup start command sent successfully");
+    return YES;
         
 
 }
@@ -577,11 +567,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
             
         case EVoiceRecognitionClientWorkStatusFinish:
             eventTypeStr = EVENT_FINAL;
-//            if (aObj && [aObj isKindOfClass:[NSDictionary class]]) {
-//                message = aObj[@"results"] ?: @"";
-//            } else if (aObj && [aObj isKindOfClass:[NSString class]]) {
-                message = aObj;
-           // }
+            message = aObj;
             self.isRecognizing = NO;
             break;
             
@@ -617,8 +603,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
             break;
             
         case EVoiceRecognitionClientWorkStatusLongSpeechEnd:
-            eventTypeStr = EVENT_FINISH;
-            
+            eventTypeStr = EVENT_FINISH;            
             message = @"长语音识别结束";
             break;
             

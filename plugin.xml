@@ -131,7 +131,7 @@
         
         <!-- 百度SDK资源文件 -->
         <resource-file src="src/ios/resources/BDSClientResources" />
-         <resource-file src="src/ios/resources/BDSClientEASRResources" />
+        <resource-file src="src/ios/resources/BDSClientEASRResources" />
         
         <!-- iOS框架依赖 -->
         <framework src="AVFoundation.framework" />

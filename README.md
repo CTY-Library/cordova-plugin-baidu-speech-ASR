@@ -2,6 +2,10 @@
 
 基于百度语音识别SDK V3.5.0的Cordova插件，提供语音识别和语音唤醒功能。
 
+https://cloud.baidu.com/doc/SPEECH/s/Tl9mh38eu
+
+
+
 ## 功能特性
 
 - ✅ **语音识别** - 实时语音转文字
@@ -14,7 +18,7 @@
 
 ## 安装
 
-### 通过npm安装（推荐）
+### 通过http安装（推荐）
 ```bash
 cordova plugin add https://github.com/CTY-Library/cordova-plugin-baidu-speech-ASR
 ```
