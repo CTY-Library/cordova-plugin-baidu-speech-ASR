@@ -73,48 +73,9 @@ public class BaiduSpeechASR extends CordovaPlugin {
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         Log.d(TAG, "Initializing BaiduSpeechASR plugin");
-
-        // 从plugin.xml preference中读取配置参数
-        loadPreferences();
+ 
     }
-
-    /**
-     * 从plugin.xml中加载preference配置
-     */
-    private void loadPreferences() {
-        // 读取API_KEY - 使用Cordova标准方式
-        apiKey = preferences.getString("API_KEY", "");
-        if (apiKey.isEmpty()) {
-            Log.w(TAG, "API_KEY not found in plugin.xml preferences");
-        } else {
-            Log.d(TAG, "API_KEY loaded from plugin.xml preferences: " + maskKey(apiKey));
-        }
-
-        // 读取SECRET_KEY - 使用Cordova标准方式
-        secretKey = preferences.getString("SECRET_KEY", "");
-        if (secretKey.isEmpty()) {
-            Log.w(TAG, "SECRET_KEY not found in plugin.xml preferences");
-        } else {
-            Log.d(TAG, "SECRET_KEY loaded from plugin.xml preferences: " + maskKey(secretKey));
-        }
-
-        // 读取APP_ID - 使用Cordova标准方式
-        appId = preferences.getString("APP_ID", "");
-        if (appId.isEmpty()) {
-            Log.w(TAG, "APP_ID not found in plugin.xml preferences");
-        } else {
-            Log.d(TAG, "APP_ID loaded from plugin.xml preferences: " + appId);
-        }
-
-        // 检查配置完整性
-        if (apiKey.isEmpty() || secretKey.isEmpty() || appId.isEmpty()) {
-            Log.w(TAG, "Some configuration parameters are missing from plugin.xml preferences");
-            Log.w(TAG, "Current config: " + getConfigInfo());
-        } else {
-            Log.i(TAG, "All configuration parameters loaded successfully from plugin.xml");
-            Log.i(TAG, "Config info: " + getConfigInfo());
-        }
-    }
+ 
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {

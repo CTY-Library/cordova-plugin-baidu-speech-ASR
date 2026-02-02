@@ -41,14 +41,6 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     
     NSLog(@"BaiduSpeechASR iOS plugin initializing...");
     
-    // 从配置文件中读取参数
-    self.apiKey = [self.commandDelegate.settings objectForKey:@"API_KEY"];
-    self.secretKey = [self.commandDelegate.settings objectForKey:@"SECRET_KEY"];
-    self.appId = [self.commandDelegate.settings objectForKey:@"APP_ID"];
-    
-    NSLog(@"BaiduSpeechASR config loaded - AppID: %@, APIKey: %@, SecretKey: %@",
-          self.appId, [self maskKey:self.apiKey], [self maskKey:self.secretKey]);
-    
     // 检查权限
     [self checkPermissions];
 }
