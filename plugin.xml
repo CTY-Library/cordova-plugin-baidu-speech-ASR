@@ -8,12 +8,7 @@
     <keywords>cordova, speech, recognition, baidu, ASR, android, ios, cross-platform</keywords>
     <repo>https://github.com/CTY-Library/cordova-plugin-baidu-speech-ASR</repo>
     <issue>https://github.com/CTY-Library/cordova-plugin-baidu-speech-ASR/issues</issue>
-    
-    <!-- 插件配置参数 -->
-    <preference name="API_KEY" />
-    <preference name="SECRET_KEY" />
-    <preference name="APP_ID" />
-    
+     
     <!-- JavaScript模块 -->
     <js-module name="BaiduSpeechASR" src="www/BaiduSpeechASR.js">
         <clobbers target="BaiduSpeechASR" />
@@ -22,10 +17,7 @@
     <!-- Android平台配置 -->
     <platform name="android">
         <!-- 配置文件注入 -->
-        <config-file target="AndroidManifest.xml" parent="/manifest/application">
-            <meta-data android:name="com.baidu.speech.APP_ID" android:value="$APP_ID" />
-            <meta-data android:name="com.baidu.speech.API_KEY" android:value="$API_KEY" />
-            <meta-data android:name="com.baidu.speech.SECRET_KEY" android:value="$SECRET_KEY" />
+        <config-file target="AndroidManifest.xml" parent="/manifest/application"> 
         </config-file>
         
         <!-- 源文件 -->
