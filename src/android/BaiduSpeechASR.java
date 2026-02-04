@@ -46,8 +46,6 @@ public class BaiduSpeechASR extends CordovaPlugin {
             Manifest.permission.READ_EXTERNAL_STORAGE
     };
 
-    // 识别管理器
-    //private BaiduRecognizerManager recognizerManager;
 
     // 唤醒管理器
     private BaiduWakeupManager wakeupManager;
@@ -73,9 +71,9 @@ public class BaiduSpeechASR extends CordovaPlugin {
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         Log.d(TAG, "Initializing BaiduSpeechASR plugin");
- 
+
     }
- 
+
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
@@ -203,7 +201,7 @@ public class BaiduSpeechASR extends CordovaPlugin {
 
                 @Override
                 public void onWakeupReady() {
-                   // sendResult(callbackContext, "wakeupReady", null);
+                    // sendResult(callbackContext, "wakeupReady", null);
                 }
             });
 
@@ -213,12 +211,6 @@ public class BaiduSpeechASR extends CordovaPlugin {
             return true;
 
         }
-//        catch (JSONException e) {
-//            Log.e(TAG, "Error parsing init parameters", e);
-//            callbackContext.error("Invalid parameters: " + e.getMessage());
-//            return false;
-//        }
-
         catch (Exception e) {
             Log.e(TAG, "Error initializing SDK", e);
             callbackContext.error("SDK initialization failed: " + e.getMessage());
@@ -289,12 +281,12 @@ public class BaiduSpeechASR extends CordovaPlugin {
     private boolean stopRecognition(CallbackContext callbackContext) {
         try {
             if (!isInited) {
-                callbackContext.error("SDK not initialized");
+                callbackContext.error("SDK not initialized SDK未初始化");
                 return false;
             }
 
             stopRecognitionInternal();
-            callbackContext.success("Recognition stopped");
+            callbackContext.success("Recognition stopped 停止语音识别成功");
             return true;
 
         } catch (Exception e) {

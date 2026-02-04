@@ -176,7 +176,5 @@ public class BaiduWakeupManager {
         }
     }
     
-    public boolean isInited() {
-        return isInited;
-    }
+
 }
