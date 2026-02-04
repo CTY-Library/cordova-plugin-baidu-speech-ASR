@@ -71,13 +71,15 @@ BaiduSpeechASR.startRecognition({
     cuid: 'device_id' // 设备ID
 }, function(result) {
     console.log('识别结果:', result);
-    
-    // 解析结果
-    if (result.action === 'results') {
-        const data = result.data;
-        console.log('识别文字:', data.results);
-        console.log('是否最终结果:', data.isFinal);
-    }
+        this.ctrlService.Toast("开始录音...", 'middle', 2000, 'login-toast');
+        debugger
+        console.log('识别结果:', result);
+        var msg = result.type == "final" ? result.message : '';
+        if(msg!=''){
+            this.resultWordMsg = msg;
+        }
+        //成功
+        //this.resultWordMsg += '\r\n' + msg + JSON.stringify(result); 
 }, function(error) {
     console.error('识别错误:', error);
 });
