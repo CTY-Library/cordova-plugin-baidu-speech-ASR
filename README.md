@@ -74,7 +74,10 @@ BaiduSpeechASR.startRecognition({
         this.ctrlService.Toast("开始录音...", 'middle', 2000, 'login-toast');
         debugger
         console.log('识别结果:', result);
+        // Android端的赋值
         var msg = result.type == "final" ? result.message : '';
+        // IOS 端的赋值
+        var msg = result.type == "final" ? result.message.results_recognition[0] : '';
         if(msg!=''){
             this.resultWordMsg = msg;
         }
