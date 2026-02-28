@@ -49,12 +49,18 @@ public class BaiduSpeechASR extends CordovaPlugin {
 
     // 唤醒管理器
     private BaiduWakeupManager wakeupManager;
+    
+    // TTS管理器
+    private BaiduTTSManager ttsManager;
 
     // 权限回调上下文
     private CallbackContext permissionCallbackContext;
 
     // 识别回调上下文
     private CallbackContext recognitionCallbackContext;
+    
+    // TTS回调上下文
+    private CallbackContext ttsCallbackContext;
 
     // 百度语音识别核心组件（从BaiduRecognizerManager合并而来）
     private EventManager asr;
@@ -102,6 +108,25 @@ public class BaiduSpeechASR extends CordovaPlugin {
                 return checkPermission(callbackContext);
             case "requestPermission":
                 return requestPermission(callbackContext);
+            // TTS相关方法
+            case "initTTS":
+                return initTTS(args, callbackContext);
+            case "speak":
+                return speak(args, callbackContext);
+            case "synthesize":
+                return synthesize(args, callbackContext);
+            case "pauseTTS":
+                return pauseTTS(callbackContext);
+            case "resumeTTS":
+                return resumeTTS(callbackContext);
+            case "stopTTS":
+                return stopTTS(callbackContext);
+            case "setTTSParams":
+                return setTTSParams(args, callbackContext);
+            case "getTTSStatus":
+                return getTTSStatus(callbackContext);
+            case "getTTSVersion":
+                return getTTSVersion(callbackContext);
             default:
                 callbackContext.error("Unknown action: " + action);
                 return false;
@@ -1120,6 +1145,272 @@ public class BaiduSpeechASR extends CordovaPlugin {
         isInited = false;
 
         Log.d(TAG, "识别器资源已释放");
+    }
+
+    // ==================== TTS相关方法 ====================
+    
+    /**
+     * 初始化TTS
+     */
+    private boolean initTTS(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject config = args.optJSONObject(0);
+            
+            String finalApiKey = this.apiKey;
+            String finalSecretKey = this.secretKey;
+            String finalAppId = this.appId;
+            
+            if (config != null) {
+                String userApiKey = config.optString("apiKey", "");
+                String userSecretKey = config.optString("secretKey", "");
+                String userAppId = config.optString("appId", "");
+                
+                if (!userApiKey.isEmpty()) finalApiKey = userApiKey;
+                if (!userSecretKey.isEmpty()) finalSecretKey = userSecretKey;
+                if (!userAppId.isEmpty()) finalAppId = userAppId;
+            }
+            
+            if (finalApiKey == null || finalSecretKey == null || finalAppId == null ||
+                finalApiKey.isEmpty() || finalSecretKey.isEmpty() || finalAppId.isEmpty()) {
+                callbackContext.error("Missing TTS configuration parameters");
+                return false;
+            }
+            
+            if (ttsManager == null) {
+                ttsManager = new BaiduTTSManager(cordova.getActivity());
+            }
+            
+            // 设置TTS事件监听器
+            ttsManager.setEventListener(new BaiduTTSEventAdapter.TTSEventListener() {
+                @Override
+                public void onTTSEvent(String type, java.util.Map<String, Object> data) {
+                    try {
+                        JSONObject result = new JSONObject();
+                        result.put("type", type);
+                        result.put("data", new JSONObject(data));
+                        
+                        PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, result);
+                        pluginResult.setKeepCallback(true);
+                        if (ttsCallbackContext != null) {
+                            ttsCallbackContext.sendPluginResult(pluginResult);
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, "TTS event error", e);
+                    }
+                }
+            });
+            
+            boolean success = ttsManager.initialize(finalApiKey, finalSecretKey, finalAppId);
+            if (success) {
+                callbackContext.success("TTS initialized successfully");
+            } else {
+                callbackContext.error("TTS initialization failed");
+            }
+            return success;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "TTS initialization error", e);
+            callbackContext.error("TTS initialization error: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * 开始语音合成并播放
+     */
+    private boolean speak(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (ttsManager == null) {
+                callbackContext.error("TTS not initialized");
+                return false;
+            }
+            
+            String text = args.optString(0, "");
+            if (text.isEmpty()) {
+                callbackContext.error("Text cannot be empty");
+                return false;
+            }
+            
+            ttsCallbackContext = callbackContext;
+            boolean success = ttsManager.speak(text);
+            
+            if (success) {
+                PluginResult result = new PluginResult(PluginResult.Status.OK, "Speaking started");
+                result.setKeepCallback(true);
+                callbackContext.sendPluginResult(result);
+            } else {
+                callbackContext.error("Failed to start speaking");
+            }
+            return success;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Speak error", e);
+            callbackContext.error("Speak error: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * 仅合成不播放
+     */
+    private boolean synthesize(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (ttsManager == null) {
+                callbackContext.error("TTS not initialized");
+                return false;
+            }
+            
+            String text = args.optString(0, "");
+            if (text.isEmpty()) {
+                callbackContext.error("Text cannot be empty");
+                return false;
+            }
+            
+            ttsCallbackContext = callbackContext;
+            boolean success = ttsManager.synthesize(text);
+            
+            if (success) {
+                PluginResult result = new PluginResult(PluginResult.Status.OK, "Synthesis started");
+                result.setKeepCallback(true);
+                callbackContext.sendPluginResult(result);
+            } else {
+                callbackContext.error("Failed to start synthesis");
+            }
+            return success;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Synthesize error", e);
+            callbackContext.error("Synthesize error: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * 暂停播放
+     */
+    private boolean pauseTTS(CallbackContext callbackContext) {
+        if (ttsManager == null) {
+            callbackContext.error("TTS not initialized");
+            return false;
+        }
+        
+        boolean success = ttsManager.pause();
+        if (success) {
+            callbackContext.success("TTS paused");
+        } else {
+            callbackContext.error("Failed to pause TTS");
+        }
+        return success;
+    }
+    
+    /**
+     * 恢复播放
+     */
+    private boolean resumeTTS(CallbackContext callbackContext) {
+        if (ttsManager == null) {
+            callbackContext.error("TTS not initialized");
+            return false;
+        }
+        
+        boolean success = ttsManager.resume();
+        if (success) {
+            callbackContext.success("TTS resumed");
+        } else {
+            callbackContext.error("Failed to resume TTS");
+        }
+        return success;
+    }
+    
+    /**
+     * 停止播放
+     */
+    private boolean stopTTS(CallbackContext callbackContext) {
+        if (ttsManager == null) {
+            callbackContext.error("TTS not initialized");
+            return false;
+        }
+        
+        boolean success = ttsManager.stop();
+        if (success) {
+            callbackContext.success("TTS stopped");
+        } else {
+            callbackContext.error("Failed to stop TTS");
+        }
+        return success;
+    }
+    
+    /**
+     * 设置TTS参数
+     */
+    private boolean setTTSParams(JSONArray args, CallbackContext callbackContext) {
+        try {
+            if (ttsManager == null) {
+                callbackContext.error("TTS not initialized");
+                return false;
+            }
+            
+            JSONObject params = args.optJSONObject(0);
+            if (params == null) {
+                callbackContext.error("Parameters cannot be null");
+                return false;
+            }
+            
+            if (params.has("speaker")) {
+                ttsManager.setSpeaker(params.getString("speaker"));
+            }
+            if (params.has("speed")) {
+                ttsManager.setSpeed(params.getInt("speed"));
+            }
+            if (params.has("pitch")) {
+                ttsManager.setPitch(params.getInt("pitch"));
+            }
+            if (params.has("volume")) {
+                ttsManager.setVolume(params.getInt("volume"));
+            }
+            
+            callbackContext.success("TTS parameters set successfully");
+            return true;
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Set TTS params error", e);
+            callbackContext.error("Set TTS params error: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * 获取TTS状态
+     */
+    private boolean getTTSStatus(CallbackContext callbackContext) {
+        if (ttsManager == null) {
+            callbackContext.error("TTS not initialized");
+            return false;
+        }
+        
+        try {
+            java.util.Map<String, Object> status = ttsManager.getStatus();
+            JSONObject result = new JSONObject(status);
+            callbackContext.success(result);
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Get TTS status error", e);
+            callbackContext.error("Get TTS status error: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * 获取TTS版本
+     */
+    private boolean getTTSVersion(CallbackContext callbackContext) {
+        if (ttsManager == null) {
+            callbackContext.error("TTS not initialized");
+            return false;
+        }
+        
+        String version = ttsManager.getVersion();
+        callbackContext.success(version);
+        return true;
     }
 
     /**

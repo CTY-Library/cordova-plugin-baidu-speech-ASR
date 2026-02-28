@@ -19,6 +19,9 @@
 #import "BDSWakeupDefines.h"
 #import "BDSWakeupParameters.h"
 
+// TTS管理器
+@class BaiduTTSManager;
+
 NS_ASSUME_NONNULL_BEGIN
 
 /**
@@ -33,9 +36,13 @@ NS_ASSUME_NONNULL_BEGIN
 // 语音唤醒事件管理器
 @property (nonatomic, strong) BDSEventManager *wakeupEventManager;
 
+// TTS管理器
+@property (nonatomic, strong) BaiduTTSManager *ttsManager;
+
 // 回调上下文
 @property (nonatomic, strong) NSString *recognitionCallbackId;
 @property (nonatomic, strong) NSString *wakeupCallbackId;
+@property (nonatomic, strong) NSString *ttsCallbackId;
 
 // 配置参数
 @property (nonatomic, strong) NSString *apiKey;

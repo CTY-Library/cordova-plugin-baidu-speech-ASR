@@ -13,6 +13,7 @@
 #import "BDSASRParameters.h"
 #import "BDSWakeupDefines.h"
 #import "BDSWakeupParameters.h"
+#import "BaiduTTSManager.h"
 
 // 回调事件类型
 static NSString * const EVENT_READY = @"ready";
@@ -787,6 +788,271 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
         return EVoiceRecognitionRecordSampleRate16K;
     }
     return EVoiceRecognitionRecordSampleRate16K; // 默认16k
+}
+
+#pragma mark - TTS相关方法
+
+/**
+ * 初始化TTS
+ */
+- (void)initTTS:(CDVInvokedUrlCommand*)command {
+    NSLog(@"BaiduTTS initTTS called");
+    
+    if (!self.ttsManager) {
+        self.ttsManager = [[BaiduTTSManager alloc] init];
+    }
+    
+    // 设置TTS事件处理器
+    __weak typeof(self) weakSelf = self;
+    self.ttsManager.eventHandler = ^(NSString *type, NSDictionary *data) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (strongSelf && strongSelf.ttsCallbackId) {
+            NSDictionary *result = @{
+                @"type": type,
+                @"data": data ?: @{}
+            };
+            
+            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                          messageAsDictionary:result];
+            [pluginResult setKeepCallbackAsBool:YES];
+            [strongSelf.commandDelegate sendPluginResult:pluginResult callbackId:strongSelf.ttsCallbackId];
+        }
+    };
+    
+    BOOL success = [self.ttsManager initialize];
+    if (success) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                     messageAsString:@"TTS initialized successfully"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"TTS initialization failed"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }
+}
+
+/**
+ * 开始语音合成并播放
+ */
+- (void)speak:(CDVInvokedUrlCommand*)command {
+    NSLog(@"BaiduTTS speak called");
+    
+    if (!self.ttsManager) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"TTS not initialized"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        return;
+    }
+    
+    NSString *text = [command.arguments objectAtIndex:0];
+    if (!text || [text isEqualToString:@""]) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"Text cannot be empty"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        return;
+    }
+    
+    self.ttsCallbackId = command.callbackId;
+    BOOL success = [self.ttsManager speak:text];
+    
+    if (success) {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                      messageAsString:@"Speaking started"];
+        [result setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"Failed to start speaking"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }
+}
+
+/**
+ * 仅合成不播放
+ */
+- (void)synthesize:(CDVInvokedUrlCommand*)command {
+    NSLog(@"BaiduTTS synthesize called");
+    
+    if (!self.ttsManager) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"TTS not initialized"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        return;
+    }
+    
+    NSString *text = [command.arguments objectAtIndex:0];
+    if (!text || [text isEqualToString:@""]) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"Text cannot be empty"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        return;
+    }
+    
+    self.ttsCallbackId = command.callbackId;
+    BOOL success = [self.ttsManager synthesize:text];
+    
+    if (success) {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                      messageAsString:@"Synthesis started"];
+        [result setKeepCallbackAsBool:YES];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"Failed to start synthesis"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }
+}
+
+/**
+ * 暂停播放
+ */
+- (void)pauseTTS:(CDVInvokedUrlCommand*)command {
+    NSLog(@"BaiduTTS pauseTTS called");
+    
+    if (!self.ttsManager) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"TTS not initialized"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        return;
+    }
+    
+    BOOL success = [self.ttsManager pause];
+    if (success) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                     messageAsString:@"TTS paused"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"Failed to pause TTS"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }
+}
+
+/**
+ * 恢复播放
+ */
+- (void)resumeTTS:(CDVInvokedUrlCommand*)command {
+    NSLog(@"BaiduTTS resumeTTS called");
+    
+    if (!self.ttsManager) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"TTS not initialized"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        return;
+    }
+    
+    BOOL success = [self.ttsManager resume];
+    if (success) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                     messageAsString:@"TTS resumed"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"Failed to resume TTS"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }
+}
+
+/**
+ * 停止播放
+ */
+- (void)stopTTS:(CDVInvokedUrlCommand*)command {
+    NSLog(@"BaiduTTS stopTTS called");
+    
+    if (!self.ttsManager) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"TTS not initialized"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        return;
+    }
+    
+    BOOL success = [self.ttsManager stop];
+    if (success) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                     messageAsString:@"TTS stopped"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"Failed to stop TTS"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }
+}
+
+/**
+ * 设置TTS参数
+ */
+- (void)setTTSParams:(CDVInvokedUrlCommand*)command {
+    NSLog(@"BaiduTTS setTTSParams called");
+    
+    if (!self.ttsManager) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"TTS not initialized"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        return;
+    }
+    
+    NSDictionary *params = [command.arguments objectAtIndex:0];
+    if (!params || ![params isKindOfClass:[NSDictionary class]]) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"Parameters must be a dictionary"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        return;
+    }
+    
+    if (params[@"voice"]) {
+        [self.ttsManager setVoice:params[@"voice"]];
+    }
+    if (params[@"rate"]) {
+        [self.ttsManager setRate:[params[@"rate"] floatValue]];
+    }
+    if (params[@"pitch"]) {
+        [self.ttsManager setPitchMultiplier:[params[@"pitch"] floatValue]];
+    }
+    if (params[@"volume"]) {
+        [self.ttsManager setVolume:[params[@"volume"] floatValue]];
+    }
+    
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                 messageAsString:@"TTS parameters set successfully"];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+}
+
+/**
+ * 获取TTS状态
+ */
+- (void)getTTSStatus:(CDVInvokedUrlCommand*)command {
+    NSLog(@"BaiduTTS getTTSStatus called");
+    
+    if (!self.ttsManager) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"TTS not initialized"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        return;
+    }
+    
+    NSDictionary *status = [self.ttsManager getStatus];
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                 messageAsDictionary:status];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+}
+
+/**
+ * 获取TTS版本
+ */
+- (void)getTTSVersion:(CDVInvokedUrlCommand*)command {
+    NSLog(@"BaiduTTS getTTSVersion called");
+    
+    if (!self.ttsManager) {
+        CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
+                                                     messageAsString:@"TTS not initialized"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        return;
+    }
+    
+    NSString *version = [self.ttsManager getVersion];
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
+                                                 messageAsString:version];
+    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
 @end

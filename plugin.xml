@@ -28,9 +28,12 @@
         <source-file src="src/android/BaiduRecogEventAdapter.java" target-dir="src/com/baidu/speech/cordova" />
         <source-file src="src/android/BaiduIRecogListener.java" target-dir="src/com/baidu/speech/cordova" />
         <source-file src="src/android/BaiduASRParams.java" target-dir="src/com/baidu/speech/cordova" />
+        <source-file src="src/android/BaiduTTSManager.java" target-dir="src/com/baidu/speech/cordova" />
+        <source-file src="src/android/BaiduTTSEventAdapter.java" target-dir="src/com/baidu/speech/cordova" />
         
         <!-- 百度SDK依赖包 -->
         <lib-file src="src/android/libs/bdasr_aipd_V3_20250717_3493171.aar" />
+        <lib-file src="src/android/libs/com.baidu.aipd.tts_6.2.7.53b015e_20250704180845.aar" />
         
         <!-- 百度SDK Native库文件 -->
         <!-- ARM64架构 -->
@@ -106,6 +109,8 @@
         <!-- iOS源文件 -->
         <source-file src="src/ios/BaiduSpeechASR.h" />
         <source-file src="src/ios/BaiduSpeechASR.m" />
+        <source-file src="src/ios/BaiduTTSManager.h" />
+        <source-file src="src/ios/BaiduTTSManager.m" />
         
         <!-- iOS头文件 -->
         <header-file src="src/ios/include/BDSpeechBaseKit.h" />

@@ -1,7 +1,7 @@
 {
   "name": "cordova-plugin-baidu-speech-ASR",
   "version": "1.0.0",
-  "description": "Cordova plugin for Baidu Speech Recognition SDK V3.5.0",
+  "description": "Cordova plugin for Baidu Speech Recognition SDK V3.5.0 and TTS SDK V6.2.7",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,8 +12,11 @@
     "baidu",
     "speech",
     "recognition",
+    "synthesis",
     "ASR",
-    "android"
+    "TTS",
+    "android",
+    "ios"
   ],
   "author": "",
   "license": "MIT",
@@ -23,7 +26,8 @@
   "cordova": {
     "id": "cordova-plugin-baidu-speech-ASR",
     "platforms": [
-      "android"
+      "android",
+      "ios"
     ]
   }
 }
