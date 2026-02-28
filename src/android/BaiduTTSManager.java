@@ -8,6 +8,7 @@ import com.baidu.tts.client.SpeechSynthesizerListener;
 import com.baidu.tts.client.SynthesizerResponse;
 import com.baidu.tts.client.TtsEntity;
 import com.baidu.tts.client.TtsMode;
+import com.baidu.tts.client.ITtsError;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,14 +63,15 @@ public class BaiduTTSManager {
         
         try {
             // 创建语音合成器
-            speechSynthesizer = new SpeechSynthesizer(context, appId);
+            speechSynthesizer = SpeechSynthesizer.getInstance();
+            speechSynthesizer.setSpeechSynthesizerListener(eventAdapter);
             
             // 设置参数
             setupOnlineParams();
             
             // 初始化在线TTS服务
-            boolean success = speechSynthesizer.initializeTts();
-            if (success) {
+            ITtsError error = speechSynthesizer.loadOnlineTts();
+            if (error.getErrorCode() == 0) {
                 isInitialized = true;
                 Log.d(TAG, "TTS initialized successfully");
                 
@@ -77,9 +79,9 @@ public class BaiduTTSManager {
                 eventAdapter.sendEvent("tts_initialized");
                 return true;
             } else {
-                Log.e(TAG, "Failed to initialize TTS");
+                Log.e(TAG, "Failed to initialize TTS: " + error.getErrorMessage());
                 eventAdapter.sendEvent("tts_error", new HashMap<String, Object>() {{
-                    put("message", "TTS initialization failed");
+                    put("message", "TTS initialization failed: " + error.getErrorMessage());
                 }});
                 return false;
             }
@@ -97,16 +99,17 @@ public class BaiduTTSManager {
      */
     private void setupOnlineParams() {
         // 设置认证参数
-        speechSynthesizer.setApiKey(apiKey);
-        speechSynthesizer.setSecretKey(secretKey);
+        speechSynthesizer.setParam(SpeechSynthesizer.PARAM_API_KEY, apiKey);
+        speechSynthesizer.setParam(SpeechSynthesizer.PARAM_SECRET_KEY, secretKey);
+        speechSynthesizer.setParam(SpeechSynthesizer.PARAM_APP_ID, appId);
         
         // 设置发音人
-        speechSynthesizer.setSpeaker(speaker);
+        speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_SPEAKER, speaker);
         
         // 设置语速、音调、音量
-        speechSynthesizer.setSpeed(speed);
-        speechSynthesizer.setPitch(pitch);
-        speechSynthesizer.setVolume(volume);
+        speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_SPEED, String.valueOf(speed));
+        speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_PITCH, String.valueOf(pitch));
+        speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_VOLUME, String.valueOf(volume));
     }
     
     /**
@@ -124,10 +127,10 @@ public class BaiduTTSManager {
         }
         
         try {
-            TtsEntity ttsEntity = new TtsEntity(text, TtsMode.ONLINE);
-            boolean success = speechSynthesizer.speak(ttsEntity);
+            TtsEntity ttsEntity = new TtsEntity(text, TtsMode.MIX_MODE);
+            ITtsError error = speechSynthesizer.speak(ttsEntity);
             
-            if (success) {
+            if (error.getErrorCode() == 0) {
                 isSpeaking = true;
                 Log.d(TAG, "TTS speak started: " + text);
                 
@@ -137,9 +140,9 @@ public class BaiduTTSManager {
                 }});
                 return true;
             } else {
-                Log.e(TAG, "Failed to speak");
+                Log.e(TAG, "Failed to speak: " + error.getErrorMessage());
                 eventAdapter.sendEvent("speak_error", new HashMap<String, Object>() {{
-                    put("message", "Failed to start speaking");
+                    put("message", "Failed to start speaking: " + error.getErrorMessage());
                 }});
                 return false;
             }
@@ -162,18 +165,29 @@ public class BaiduTTSManager {
         }
         
         try {
-            TtsEntity ttsEntity = new TtsEntity(text, TtsMode.ONLINE);
-            boolean success = speechSynthesizer.synthesize(ttsEntity);
+            TtsEntity ttsEntity = new TtsEntity(text, TtsMode.MIX_MODE);
+            ITtsError error = speechSynthesizer.synthesize(ttsEntity);
             
-            if (success) {
+            if (error.getErrorCode() == 0) {
                 Log.d(TAG, "TTS synthesize started: " + text);
+                
+                // 发送合成开始事件
+                eventAdapter.sendEvent("synthesize_start", new HashMap<String, Object>() {{
+                    put("text", text);
+                }});
                 return true;
             } else {
-                Log.e(TAG, "Failed to synthesize");
+                Log.e(TAG, "Failed to synthesize: " + error.getErrorMessage());
+                eventAdapter.sendEvent("synthesize_error", new HashMap<String, Object>() {{
+                    put("message", "Failed to start synthesis: " + error.getErrorMessage());
+                }});
                 return false;
             }
         } catch (Exception e) {
             Log.e(TAG, "Synthesize error", e);
+            eventAdapter.sendEvent("synthesize_error", new HashMap<String, Object>() {{
+                put("message", "Synthesize error: " + e.getMessage());
+            }});
             return false;
         }
     }
@@ -252,7 +266,7 @@ public class BaiduTTSManager {
     public void setSpeaker(String speaker) {
         this.speaker = speaker;
         if (isInitialized && speechSynthesizer != null) {
-            speechSynthesizer.setSpeaker(speaker);
+            speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_SPEAKER, speaker);
         }
     }
     
@@ -262,7 +276,7 @@ public class BaiduTTSManager {
     public void setSpeed(int speed) {
         this.speed = Math.max(1, Math.min(15, speed));
         if (isInitialized && speechSynthesizer != null) {
-            speechSynthesizer.setSpeed(this.speed);
+            speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_SPEED, String.valueOf(this.speed));
         }
     }
     
@@ -272,7 +286,7 @@ public class BaiduTTSManager {
     public void setPitch(int pitch) {
         this.pitch = Math.max(1, Math.min(15, pitch));
         if (isInitialized && speechSynthesizer != null) {
-            speechSynthesizer.setPitch(this.pitch);
+            speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_PITCH, String.valueOf(this.pitch));
         }
     }
     
@@ -282,7 +296,7 @@ public class BaiduTTSManager {
     public void setVolume(int volume) {
         this.volume = Math.max(1, Math.min(15, volume));
         if (isInitialized && speechSynthesizer != null) {
-            speechSynthesizer.setVolume(this.volume);
+            speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_VOLUME, String.valueOf(this.volume));
         }
     }
     
