@@ -63,7 +63,7 @@ public class BaiduTTSManager {
         
         try {
             // 创建语音合成器
-            speechSynthesizer = SpeechSynthesizer.getInstance();
+            speechSynthesizer = new SpeechSynthesizer(context);
             speechSynthesizer.setSpeechSynthesizerListener(eventAdapter);
             
             // 设置参数
@@ -71,7 +71,7 @@ public class BaiduTTSManager {
             
             // 初始化在线TTS服务
             ITtsError error = speechSynthesizer.loadOnlineTts();
-            if (error.getErrorCode() == 0) {
+            if (error.getDetailCode() == 0) {
                 isInitialized = true;
                 Log.d(TAG, "TTS initialized successfully");
                 
@@ -79,9 +79,9 @@ public class BaiduTTSManager {
                 eventAdapter.sendEvent("tts_initialized");
                 return true;
             } else {
-                Log.e(TAG, "Failed to initialize TTS: " + error.getErrorMessage());
+                Log.e(TAG, "Failed to initialize TTS: " + error.getDetailMessage());
                 eventAdapter.sendEvent("tts_error", new HashMap<String, Object>() {{
-                    put("message", "TTS initialization failed: " + error.getErrorMessage());
+                    put("message", "TTS initialization failed: " + error.getDetailMessage());
                 }});
                 return false;
             }
@@ -108,8 +108,8 @@ public class BaiduTTSManager {
         
         // 设置语速、音调、音量
         speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_SPEED, String.valueOf(speed));
-        speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_PITCH, String.valueOf(pitch));
-        speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_VOLUME, String.valueOf(volume));
+        speechSynthesizer.setParam(SpeechSynthesizer.PARAM_PITCH, String.valueOf(pitch));
+        speechSynthesizer.setParam(SpeechSynthesizer.PARAM_VOLUME, String.valueOf(volume));
     }
     
     /**
@@ -127,10 +127,10 @@ public class BaiduTTSManager {
         }
         
         try {
-            TtsEntity ttsEntity = new TtsEntity(text, TtsMode.MIX_MODE);
+            TtsEntity ttsEntity = new TtsEntity(text, TtsMode.MIX);
             ITtsError error = speechSynthesizer.speak(ttsEntity);
             
-            if (error.getErrorCode() == 0) {
+            if (error.getDetailCode() == 0) {
                 isSpeaking = true;
                 Log.d(TAG, "TTS speak started: " + text);
                 
@@ -140,9 +140,9 @@ public class BaiduTTSManager {
                 }});
                 return true;
             } else {
-                Log.e(TAG, "Failed to speak: " + error.getErrorMessage());
+                Log.e(TAG, "Failed to speak: " + error.getDetailMessage());
                 eventAdapter.sendEvent("speak_error", new HashMap<String, Object>() {{
-                    put("message", "Failed to start speaking: " + error.getErrorMessage());
+                    put("message", "Failed to start speaking: " + error.getDetailMessage());
                 }});
                 return false;
             }
@@ -165,10 +165,10 @@ public class BaiduTTSManager {
         }
         
         try {
-            TtsEntity ttsEntity = new TtsEntity(text, TtsMode.MIX_MODE);
+            TtsEntity ttsEntity = new TtsEntity(text, TtsMode.MIX);
             ITtsError error = speechSynthesizer.synthesize(ttsEntity);
             
-            if (error.getErrorCode() == 0) {
+            if (error.getDetailCode() == 0) {
                 Log.d(TAG, "TTS synthesize started: " + text);
                 
                 // 发送合成开始事件
@@ -177,9 +177,9 @@ public class BaiduTTSManager {
                 }});
                 return true;
             } else {
-                Log.e(TAG, "Failed to synthesize: " + error.getErrorMessage());
+                Log.e(TAG, "Failed to synthesize: " + error.getDetailMessage());
                 eventAdapter.sendEvent("synthesize_error", new HashMap<String, Object>() {{
-                    put("message", "Failed to start synthesis: " + error.getErrorMessage());
+                    put("message", "Failed to start synthesis: " + error.getDetailMessage());
                 }});
                 return false;
             }
@@ -286,7 +286,7 @@ public class BaiduTTSManager {
     public void setPitch(int pitch) {
         this.pitch = Math.max(1, Math.min(15, pitch));
         if (isInitialized && speechSynthesizer != null) {
-            speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_PITCH, String.valueOf(this.pitch));
+            speechSynthesizer.setParam(SpeechSynthesizer.PARAM_PITCH, String.valueOf(this.pitch));
         }
     }
     
@@ -296,7 +296,7 @@ public class BaiduTTSManager {
     public void setVolume(int volume) {
         this.volume = Math.max(1, Math.min(15, volume));
         if (isInitialized && speechSynthesizer != null) {
-            speechSynthesizer.setParam(SpeechSynthesizer.PARAM_ONLINE_VOLUME, String.valueOf(this.volume));
+            speechSynthesizer.setParam(SpeechSynthesizer.PARAM_VOLUME, String.valueOf(this.volume));
         }
     }
     
