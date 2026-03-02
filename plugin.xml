@@ -35,6 +35,9 @@
         <lib-file src="src/android/libs/bdasr_aipd_V3_20250717_3493171.aar" />
         <lib-file src="src/android/libs/com.baidu.aipd.tts_6.2.7.53b015e_20250704180845.aar" />
         
+        <!-- TTS SDK内部JAR文件 -->
+        <lib-file src="src/android/libs/libs/com.baidu.tts_6.2.7.fb21735_20250613180318.jar" />
+        
         <!-- 百度SDK Native库文件 -->
         <!-- ARM64架构 -->
         <source-file src="src/android/src/main/jniLibs/arm64-v8a/libBaiduSpeechSDK.so" target-dir="jniLibs/arm64-v8a" />
