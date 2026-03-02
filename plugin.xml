@@ -35,6 +35,10 @@
         <lib-file src="src/android/libs/bdasr_aipd_V3_20250717_3493171.aar" />
         <lib-file src="src/android/libs/com.baidu.aipd.tts_6.2.7.53b015e_20250704180845.aar" />
         
+        <!-- TTS SDK内部JAR文件 -->
+        <lib-file src="src/android/libs/libs/auth_base_20250707.jar" />
+        <lib-file src="src/android/libs/libs/com.baidu.tts_6.2.7.fb21735_20250613180318.jar" />
+        
         <!-- 百度SDK Native库文件 -->
         <!-- ARM64架构 -->
         <source-file src="src/android/src/main/jniLibs/arm64-v8a/libBaiduSpeechSDK.so" target-dir="jniLibs/arm64-v8a" />
@@ -43,12 +47,22 @@
         <source-file src="src/android/src/main/jniLibs/arm64-v8a/libbd_easr_s1_merge_normal_20151216.dat.so" target-dir="jniLibs/arm64-v8a" />
         <source-file src="src/android/src/main/jniLibs/arm64-v8a/libvad.dnn.so" target-dir="jniLibs/arm64-v8a" />
         
+        <!-- TTS Native库 ARM64 -->
+        <source-file src="src/android/libs/jni/arm64-v8a/libBDSpeechDecoder_V1.so" target-dir="jniLibs/arm64-v8a" />
+        <source-file src="src/android/libs/jni/arm64-v8a/libbd_etts.so" target-dir="jniLibs/arm64-v8a" />
+        <source-file src="src/android/libs/jni/arm64-v8a/libc++_shared.so" target-dir="jniLibs/arm64-v8a" />
+        
         <!-- ARM v7a架构 -->
         <source-file src="src/android/src/main/jniLibs/armeabi-v7a/libBaiduSpeechSDK.so" target-dir="jniLibs/armeabi-v7a" />
         <source-file src="src/android/src/main/jniLibs/armeabi-v7a/libbdEASRAndroid.so" target-dir="jniLibs/armeabi-v7a" />
         <source-file src="src/android/src/main/jniLibs/armeabi-v7a/libbdSpilWakeup.so" target-dir="jniLibs/armeabi-v7a" />
         <source-file src="src/android/src/main/jniLibs/armeabi-v7a/libbd_easr_s1_merge_normal_20151216.dat.so" target-dir="jniLibs/armeabi-v7a" />
         <source-file src="src/android/src/main/jniLibs/armeabi-v7a/libvad.dnn.so" target-dir="jniLibs/armeabi-v7a" />
+        
+        <!-- TTS Native库 ARM v7a -->
+        <source-file src="src/android/libs/jni/armeabi-v7a/libBDSpeechDecoder_V1.so" target-dir="jniLibs/armeabi-v7a" />
+        <source-file src="src/android/libs/jni/armeabi-v7a/libbd_etts.so" target-dir="jniLibs/armeabi-v7a" />
+        <source-file src="src/android/libs/jni/armeabi-v7a/libc++_shared.so" target-dir="jniLibs/armeabi-v7a" />
         
         <!-- ARM架构 (兼容性) -->
         <source-file src="src/android/src/main/jniLibs/armeabi/libBaiduSpeechSDK.so" target-dir="jniLibs/armeabi" />
@@ -64,12 +78,22 @@
         <source-file src="src/android/src/main/jniLibs/x86/libbd_easr_s1_merge_normal_20151216.dat.so" target-dir="jniLibs/x86" />
         <source-file src="src/android/src/main/jniLibs/x86/libvad.dnn.so" target-dir="jniLibs/x86" />
         
+        <!-- TTS Native库 x86 -->
+        <source-file src="src/android/libs/jni/x86/libBDSpeechDecoder_V1.so" target-dir="jniLibs/x86" />
+        <source-file src="src/android/libs/jni/x86/libbd_etts.so" target-dir="jniLibs/x86" />
+        <source-file src="src/android/libs/jni/x86/libc++_shared.so" target-dir="jniLibs/x86" />
+        
         <!-- x86_64架构 -->
         <source-file src="src/android/src/main/jniLibs/x86_64/libBaiduSpeechSDK.so" target-dir="jniLibs/x86_64" />
         <source-file src="src/android/src/main/jniLibs/x86_64/libbdEASRAndroid.so" target-dir="jniLibs/x86_64" />
         <source-file src="src/android/src/main/jniLibs/x86_64/libbdSpilWakeup.so" target-dir="jniLibs/x86_64" />
         <source-file src="src/android/src/main/jniLibs/x86_64/libbd_easr_s1_merge_normal_20151216.dat.so" target-dir="jniLibs/x86_64" />
         <source-file src="src/android/src/main/jniLibs/x86_64/libvad.dnn.so" target-dir="jniLibs/x86_64" />
+        
+        <!-- TTS Native库 x86_64 -->
+        <source-file src="src/android/libs/jni/x86_64/libBDSpeechDecoder_V1.so" target-dir="jniLibs/x86_64" />
+        <source-file src="src/android/libs/jni/x86_64/libbd_etts.so" target-dir="jniLibs/x86_64" />
+        <source-file src="src/android/libs/jni/x86_64/libc++_shared.so" target-dir="jniLibs/x86_64" />
         
         <!-- 权限配置 -->
         <config-file target="AndroidManifest.xml" parent="/manifest">
