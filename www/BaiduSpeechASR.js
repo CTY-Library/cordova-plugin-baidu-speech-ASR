@@ -1,4 +1,4 @@
-﻿var exec = require(" cordova/exec\);
+﻿var exec = require("cordova/exec");
 
 var BaiduSpeechASR = {
  /**
@@ -11,7 +11,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  init: function (config, success, error) {
- exec(success, error, \BaiduSpeechASR\, \init\, [config]);
+ exec(success, error, 'BaiduSpeechASR', 'init', [config]);
  },
 
  /**
@@ -19,13 +19,13 @@ var BaiduSpeechASR = {
  * @param {Object} params - 识别参数
  * @param {number} [params.pid=1537] - 识别模型ID，1537为普通话模型
  * @param {number} [params.rate=16000] - 采样率
- * @param {string} [params.language=\zh\] - 语言
- * @param {string} [params.cuid=\\] - 设备唯一标识
+ * @param {string} [params.language='zh'] - 语言
+ * @param {string} [params.cuid=''] - 设备唯一标识
  * @param {Function} success - 结果回调（含中间/最终结果）
  * @param {Function} error - 错误回调
  */
  startRecognition: function (params, success, error) {
- exec(success, error, \BaiduSpeechASR\, \startRecognition\, [params || {}]);
+ exec(success, error, 'BaiduSpeechASR', 'startRecognition', [params || {}]);
  },
 
  /**
@@ -34,7 +34,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  stopRecognition: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \stopRecognition\, []);
+ exec(success, error, 'BaiduSpeechASR', 'stopRecognition', []);
  },
 
  /**
@@ -43,7 +43,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  cancelRecognition: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \cancelRecognition\, []);
+ exec(success, error, 'BaiduSpeechASR', 'cancelRecognition', []);
  },
 
  /**
@@ -52,18 +52,18 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  release: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \release\, []);
+ exec(success, error, 'BaiduSpeechASR', 'release', []);
  },
 
  /**
  * 开始语音唤醒
  * @param {Object} params - 唤醒参数
- * @param {string} [params.wakeupWords=\\] - 唤醒词
+ * @param {string} [params.wakeupWords=''] - 唤醒词
  * @param {Function} success - 唤醒回调
  * @param {Function} error - 错误回调
  */
  startWakeup: function (params, success, error) {
- exec(success, error, \BaiduSpeechASR\, \startWakeup\, [params || {}]);
+ exec(success, error, 'BaiduSpeechASR', 'startWakeup', [params || {}]);
  },
 
  /**
@@ -72,7 +72,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  stopWakeup: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \stopWakeup\, []);
+ exec(success, error, 'BaiduSpeechASR', 'stopWakeup', []);
  },
 
  /**
@@ -82,7 +82,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  setParams: function (params, success, error) {
- exec(success, error, \BaiduSpeechASR\, \setParams\, [params]);
+ exec(success, error, 'BaiduSpeechASR', 'setParams', [params]);
  },
 
  /**
@@ -91,7 +91,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  getVersion: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \getVersion\, []);
+ exec(success, error, 'BaiduSpeechASR', 'getVersion', []);
  },
 
  /**
@@ -100,7 +100,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  checkPermission: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \checkPermission\, []);
+ exec(success, error, 'BaiduSpeechASR', 'checkPermission', []);
  },
 
  /**
@@ -109,7 +109,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  requestPermission: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \requestPermission\, []);
+ exec(success, error, 'BaiduSpeechASR', 'requestPermission', []);
  },
 
  /**
@@ -122,14 +122,14 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  initTTS: function (config, success, error) {
- exec(success, error, \BaiduSpeechASR\, \initTTS\, [config]);
+ exec(success, error, 'BaiduSpeechASR', 'initTTS', [config]);
  },
 
  /**
  * 开始语音合成并播放
  * @param {Object} params - 合成参数
  * @param {string} params.text - 要合成的文本
- * @param {string} [params.speaker=\4\] - 发音人ID
+ * @param {string} [params.speaker='4'] - 发音人ID
  * @param {number} [params.speed=5] - 语速(1-15)
  * @param {number} [params.pitch=5] - 音调(1-15)
  * @param {number} [params.volume=5] - 音量(1-15)
@@ -137,14 +137,14 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  speak: function (params, success, error) {
- exec(success, error, \BaiduSpeechASR\, \speak\, [params || {}]);
+ exec(success, error, 'BaiduSpeechASR', 'speak', [params || {}]);
  },
 
  /**
  * 仅合成不播放
  * @param {Object} params - 合成参数
  * @param {string} params.text - 要合成的文本
- * @param {string} [params.speaker=\4\] - 发音人ID
+ * @param {string} [params.speaker='4'] - 发音人ID
  * @param {number} [params.speed=5] - 语速(1-15)
  * @param {number} [params.pitch=5] - 音调(1-15)
  * @param {number} [params.volume=5] - 音量(1-15)
@@ -152,7 +152,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  synthesize: function (params, success, error) {
- exec(success, error, \BaiduSpeechASR\, \synthesize\, [params || {}]);
+ exec(success, error, 'BaiduSpeechASR', 'synthesize', [params || {}]);
  },
 
  /**
@@ -161,7 +161,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  pauseTTS: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \pauseTTS\, []);
+ exec(success, error, 'BaiduSpeechASR', 'pauseTTS', []);
  },
 
  /**
@@ -170,7 +170,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  resumeTTS: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \resumeTTS\, []);
+ exec(success, error, 'BaiduSpeechASR', 'resumeTTS', []);
  },
 
  /**
@@ -179,7 +179,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  stopTTS: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \stopTTS\, []);
+ exec(success, error, 'BaiduSpeechASR', 'stopTTS', []);
  },
 
  /**
@@ -193,7 +193,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  setTTSParams: function (params, success, error) {
- exec(success, error, \BaiduSpeechASR\, \setTTSParams\, [params || {}]);
+ exec(success, error, 'BaiduSpeechASR', 'setTTSParams', [params || {}]);
  },
 
  /**
@@ -202,7 +202,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  getTTSStatus: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \getTTSStatus\, []);
+ exec(success, error, 'BaiduSpeechASR', 'getTTSStatus', []);
  },
 
  /**
@@ -211,7 +211,7 @@ var BaiduSpeechASR = {
  * @param {Function} error - 错误回调
  */
  getTTSVersion: function (success, error) {
- exec(success, error, \BaiduSpeechASR\, \getTTSVersion\, []);
+ exec(success, error, 'BaiduSpeechASR', 'getTTSVersion', []);
  }
 };
 
