@@ -49,6 +49,35 @@ public class BaiduTTSManager {
     public BaiduTTSManager(Context context) {
         this.context = context;
         this.eventAdapter = new BaiduTTSEventAdapter();
+        
+        // 设置事件监听器来处理状态变化
+        this.eventAdapter.setEventListener(new BaiduTTSEventAdapter.TTSEventListener() {
+            @Override
+            public void onTTSEvent(String type, Map<String, Object> data) {
+                Log.d(TAG, "TTS Event received: " + type);
+                
+                switch (type) {
+                    case "play_finish":
+                    case "synthesize_finish":
+                    case "synthesize_stop":
+                        // 播放完成或停止时重置状态
+                        isSpeaking = false;
+                        Log.d(TAG, "TTS speaking state reset to false");
+                        break;
+                    case "play_start":
+                        // 开始播放时设置状态
+                        isSpeaking = true;
+                        Log.d(TAG, "TTS speaking state set to true");
+                        break;
+                    case "synthesize_error":
+                    case "play_error":
+                        // 错误时重置状态
+                        isSpeaking = false;
+                        Log.e(TAG, "TTS error, reset speaking state");
+                        break;
+                }
+            }
+        });
     }
     
     /**
@@ -131,7 +160,6 @@ public class BaiduTTSManager {
             ITtsError error = speechSynthesizer.speak(ttsEntity);
             
             if (error.getDetailCode() == 0) {
-                isSpeaking = true;
                 Log.d(TAG, "TTS speak started: " + text);
                 
                 // 发送开始播放事件
@@ -238,7 +266,6 @@ public class BaiduTTSManager {
         
         try {
             speechSynthesizer.stop();
-            isSpeaking = false;
             Log.d(TAG, "TTS stopped");
             return true;
         } catch (Exception e) {
