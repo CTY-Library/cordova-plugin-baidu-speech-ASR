@@ -76,7 +76,6 @@
     
     // 开始语音合成
     [self.speechSynthesizer speakUtterance:utterance];
-    self.isSpeaking = YES;
     
     NSLog(@"TTS speak started: %@", text);
     
@@ -199,6 +198,7 @@
 
 - (void)speechSynthesizer:(AVSpeechSynthesizer *)synthesizer didStartSpeechUtterance:(AVSpeechUtterance *)utterance {
     NSLog(@"Speech started: %@", utterance.speechString);
+    self.isSpeaking = YES;
     
     if (self.eventHandler) {
         self.eventHandler(@"play_start", @{
