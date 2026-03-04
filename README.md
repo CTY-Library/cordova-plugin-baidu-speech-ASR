@@ -238,6 +238,40 @@ class SpeechRecognitionApp {
             console.error('停止失败:', error);
         });
     }
+
+
+    // 语音合成
+    baiduTTS_init(){
+        this.ctrlService.Toast("初始化TTS...", 'middle', 2000, 'login-toast');
+        // 初始化TTS
+        BaiduSpeechASR.initTTS({
+            apiKey: 'xx',
+            secretKey: 'xx',
+            appId: 'xx'
+        }, (success: any) => {
+            console.log("TTS初始化成功");      
+            this.ctrlService.Toast("TTS初始化成功...", 'middle', 2000, 'login-toast');      
+            
+        }, (error: any) => {
+            this.ctrlService.Toast("TTS初始化失败!!!!!", 'middle', 2000, 'login-toast');   
+            console.error("TTS初始化失败", error);
+        });
+    }
+
+    baiduTTS_begin(){           
+        this.ctrlService.Toast("开始朗读成功...", 'middle', 2000, 'login-toast');      
+        // 开始语音合成
+        BaiduSpeechASR.speak(
+            "你好，世界,2026！" 
+        , (result: any) => {
+            console.log("语音合成开始");
+        }, (error: any) => {
+            console.error("语音合成失败", error);
+                this.ctrlService.Toast("语音合成失败...", 'middle', 2000, 'login-toast');   
+        });
+       
+    }
+
 }
 
 // 使用示例
