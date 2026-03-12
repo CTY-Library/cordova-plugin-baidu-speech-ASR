@@ -13,7 +13,7 @@
 #import "BDSASRParameters.h"
 #import "BDSWakeupDefines.h"
 #import "BDSWakeupParameters.h"
-#import "BaiduTTSManager.h"
+#import "BaiduRestTTSManager.h"
 
 // 回调事件类型
 static NSString * const EVENT_READY = @"ready";
@@ -798,14 +798,14 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
 - (void)initTTS:(CDVInvokedUrlCommand*)command {
     NSLog(@"BaiduTTS initTTS called");
     
-    if (!self.ttsManager) {
-        self.ttsManager = [[BaiduTTSManager alloc] init];
+    if (!self.restTtsManager) {
+        self.restTtsManager = [[BaiduRestTTSManager alloc] init];
     }
     
     // 设置TTS事件处理器
-    __weak typeof(self) weakSelf = self;
-    self.ttsManager.eventHandler = ^(NSString *type, NSDictionary *data) {
-        __strong typeof(weakSelf) strongSelf = weakSelf;
+    __weak BaiduSpeechASR *weakSelf = self;
+    self.restTtsManager.eventHandler = ^(NSString *type, NSDictionary *data) {
+        __strong BaiduSpeechASR *strongSelf = weakSelf;
         if (strongSelf && strongSelf.ttsCallbackId) {
             NSDictionary *result = @{
                 @"type": type,
@@ -819,7 +819,13 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
         }
     };
     
-    BOOL success = [self.ttsManager initialize];
+    // 获取配置参数
+    NSDictionary *config = [command.arguments objectAtIndex:0];
+    NSString *apiKey = config[@"apiKey"];
+    NSString *secretKey = config[@"secretKey"];
+    NSString *appId = config[@"appId"];
+    
+    BOOL success = [self.restTtsManager initialize:apiKey secretKey:secretKey];
     if (success) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                      messageAsString:@"TTS initialized successfully"];
@@ -837,7 +843,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
 - (void)speak:(CDVInvokedUrlCommand*)command {
     NSLog(@"BaiduTTS speak called");
     
-    if (!self.ttsManager) {
+    if (!self.restTtsManager) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"TTS not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
@@ -853,7 +859,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     }
     
     self.ttsCallbackId = command.callbackId;
-    BOOL success = [self.ttsManager speak:text];
+    BOOL success = [self.restTtsManager speak:text];
     
     if (success) {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
@@ -873,7 +879,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
 - (void)synthesize:(CDVInvokedUrlCommand*)command {
     NSLog(@"BaiduTTS synthesize called");
     
-    if (!self.ttsManager) {
+    if (!self.restTtsManager) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"TTS not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
@@ -889,7 +895,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     }
     
     self.ttsCallbackId = command.callbackId;
-    BOOL success = [self.ttsManager synthesize:text];
+    BOOL success = [self.restTtsManager synthesize:text];
     
     if (success) {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
@@ -909,14 +915,14 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
 - (void)pauseTTS:(CDVInvokedUrlCommand*)command {
     NSLog(@"BaiduTTS pauseTTS called");
     
-    if (!self.ttsManager) {
+    if (!self.restTtsManager) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"TTS not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
     
-    BOOL success = [self.ttsManager pause];
+    BOOL success = [self.restTtsManager pause];
     if (success) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                      messageAsString:@"TTS paused"];
@@ -934,14 +940,14 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
 - (void)resumeTTS:(CDVInvokedUrlCommand*)command {
     NSLog(@"BaiduTTS resumeTTS called");
     
-    if (!self.ttsManager) {
+    if (!self.restTtsManager) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"TTS not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
     
-    BOOL success = [self.ttsManager resume];
+    BOOL success = [self.restTtsManager resume];
     if (success) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                      messageAsString:@"TTS resumed"];
@@ -959,14 +965,14 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
 - (void)stopTTS:(CDVInvokedUrlCommand*)command {
     NSLog(@"BaiduTTS stopTTS called");
     
-    if (!self.ttsManager) {
+    if (!self.restTtsManager) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"TTS not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
     
-    BOOL success = [self.ttsManager stop];
+    BOOL success = [self.restTtsManager stop];
     if (success) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                      messageAsString:@"TTS stopped"];
@@ -984,7 +990,7 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
 - (void)setTTSParams:(CDVInvokedUrlCommand*)command {
     NSLog(@"BaiduTTS setTTSParams called");
     
-    if (!self.ttsManager) {
+    if (!self.restTtsManager) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"TTS not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
@@ -1000,16 +1006,16 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
     }
     
     if (params[@"voice"]) {
-        [self.ttsManager setVoice:params[@"voice"]];
+        [self.restTtsManager setVoice:params[@"voice"]];
     }
     if (params[@"rate"]) {
-        [self.ttsManager setRate:[params[@"rate"] floatValue]];
+        [self.restTtsManager setSpeed:[params[@"rate"] floatValue]];
     }
     if (params[@"pitch"]) {
-        [self.ttsManager setPitchMultiplier:[params[@"pitch"] floatValue]];
+        [self.restTtsManager setPitch:[params[@"pitch"] floatValue]];
     }
     if (params[@"volume"]) {
-        [self.ttsManager setVolume:[params[@"volume"] floatValue]];
+        [self.restTtsManager setVolume:[params[@"volume"] floatValue]];
     }
     
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
@@ -1023,14 +1029,14 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
 - (void)getTTSStatus:(CDVInvokedUrlCommand*)command {
     NSLog(@"BaiduTTS getTTSStatus called");
     
-    if (!self.ttsManager) {
+    if (!self.restTtsManager) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"TTS not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
     
-    NSDictionary *status = [self.ttsManager getStatus];
+    NSDictionary *status = [self.restTtsManager getStatus];
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                  messageAsDictionary:status];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
@@ -1042,14 +1048,14 @@ static NSString *const BDS_WAKEUP_DEBUG_UPLOAD_LIMITS_URL = @"mic_wakeup_debug_u
 - (void)getTTSVersion:(CDVInvokedUrlCommand*)command {
     NSLog(@"BaiduTTS getTTSVersion called");
     
-    if (!self.ttsManager) {
+    if (!self.restTtsManager) {
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR
                                                      messageAsString:@"TTS not initialized"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
         return;
     }
     
-    NSString *version = [self.ttsManager getVersion];
+    NSString *version = [self.restTtsManager getVersion];
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK
                                                  messageAsString:version];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];

@@ -239,12 +239,11 @@ class SpeechRecognitionApp {
         });
     }
 
-
     // 语音合成
     baiduTTS_init(){
         this.ctrlService.Toast("初始化TTS...", 'middle', 2000, 'login-toast');
         // 初始化TTS
-        BaiduSpeechASR.initTTS({
+        BaiduSpeechASR.initTTS({  
             apiKey: 'xx',
             secretKey: 'xx',
             appId: 'xx'

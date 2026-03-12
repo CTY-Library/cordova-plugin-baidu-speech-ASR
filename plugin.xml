@@ -132,8 +132,8 @@
         <!-- iOS源文件 -->
         <source-file src="src/ios/BaiduSpeechASR.h" />
         <source-file src="src/ios/BaiduSpeechASR.m" />
-        <source-file src="src/ios/BaiduTTSManager.h" />
-        <source-file src="src/ios/BaiduTTSManager.m" />
+        <source-file src="src/ios/BaiduRestTTSManager.h" />
+        <source-file src="src/ios/BaiduRestTTSManager.m" />
         
         <!-- iOS头文件 -->
         <header-file src="src/ios/include/BDSpeechBaseKit.h" />
@@ -164,6 +164,7 @@
         <framework src="CoreGraphics.framework" />
         <framework src="Foundation.framework" />
         <framework src="UIKit.framework" />
+        <framework src="libiconv.dylib" />
         
         <!-- Info.plist 配置 -->
         <config-file target="*-Info.plist" parent="NSMicrophoneUsageDescription">
