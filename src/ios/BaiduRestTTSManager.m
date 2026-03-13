@@ -116,7 +116,7 @@ static NSString *const kBaiduOAuthURL = @"https://aip.baidubce.com/oauth/2.0/tok
         return;
     }
     
-    // 构建请求参数
+    // 构建请求参数 https://cloud.baidu.com/doc/SPEECH/s/mlbxh7xie
     NSDictionary *params = @{
         @"tex": text,
         @"tok": self.accessToken,
@@ -125,8 +125,8 @@ static NSString *const kBaiduOAuthURL = @"https://aip.baidubce.com/oauth/2.0/tok
         @"lan": @"zh",
         @"spd": @"5",
         @"pit": @"5",
-        @"vol": @"100000",
-        @"per": @"5",
+        @"vol": @"9", // 音量，基础音库取值0-9
+        @"per": @"1", // 0 女声 1 男声
         @"aue": @"3"  // mp3格式
     };
     
